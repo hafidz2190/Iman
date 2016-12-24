@@ -1,0 +1,15 @@
+{
+    "database": {
+        "client": "mysql",
+        "connection": {
+            "host": "localhost",
+            "user": "root",
+            "password": "root",
+            "database": "iman",
+            "charset": "utf8"
+        }
+    },
+    "server": {
+        "port": "9999"
+    }
+}
