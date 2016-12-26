@@ -1,60 +1,58 @@
-var mapperMap = require('../mappers/index');
+var serializerManager = require('./serializerManager');
 var modelMap = require('../models/index');
 
 function managerDefinitions() 
 {
-    function fetchAll(tableName, callback)
+    function fetch(tableName, filterMap, callback)
     {
-        return mapperMap[tableName].fetchAll().then(modelMapper).then(callback);
+        return new modelMap[tableName](filterMap).fetch().then(serializer).then(callback);
 
-        function modelMapper(result)
-        {
-            return new Promise((resolve, reject) => {
-                var rows = result.models;
-                var propertyMap = new modelMap[tableName]();
-                var models = [];
-
-                for(var i = 0, ii = rows.length; i < ii; i++)
-                {
-                    var row = rows[i];
-                    var model = new modelMap[tableName]();
-
-                    for(var key in propertyMap)
-                        model[key] = row.attributes[key];
-
-                    models.push(model);
-                }
-
-                return resolve(models);
-            });
-        }
-    }
-
-    function fetch(tableName, modelObject, callback)
-    {
-        return new mapperMap[tableName](modelObject).fetch().then(modelMapper).then(callback);
-
-        function modelMapper(result)
+        function serializer(result)
         {
             return new Promise((resolve, reject) => {
                 if(!result)
                     return resolve([]);
 
-                var row = result;
-                var propertyMap = new modelMap[tableName]();
-                var model = new modelMap[tableName]();
-
-                for(var key in propertyMap)
-                    model[key] = row.attributes[key];
-
-                return resolve([model]);
+                return resolve(serializerManager.serialize(result.attributes));
             });
         }
     }
 
+    function fetchWithRelated(tableName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize, callback)
+    {
+        return new modelMap[tableName](forger).query(filterMap).query(orderByHandler).query(limitHandler).fetch({withRelated: relatedTableNames}).then(serializer).then(callback);
+
+        function serializer(result)
+        {
+            return new Promise((resolve, reject) => {
+                if(!result)
+                    return resolve([]);
+
+                return resolve(serializerManager.serializeArray(result.models));
+            });
+        }
+
+        function orderByHandler(qb)
+        {
+            if(!sortDescriptions)
+                return;
+            
+            for(var i = 0, ii = sortDescriptions.length; i < ii; i++)
+                qb.orderBy(sortDescriptions[i].field, sortDescriptions[i].direction);
+        }
+
+        function limitHandler(qb)
+        {
+            if(!pageSize)
+                return;
+
+            qb.limit(pageSize);
+        }
+    }
+
     return {
-        fetchAll: fetchAll,
-        fetch: fetch
+        fetch: fetch,
+        fetchWithRelated: fetchWithRelated
     };
 }
 

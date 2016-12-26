@@ -1,9 +1,13 @@
-function modelDefinition()
+var dbManager = require('../helpers/dbManager');
+
+var model = dbManager.Model.extend({
+    tableName: 'user',
+    userSession: userSessionRelatedModelHandler
+});
+
+function userSessionRelatedModelHandler()
 {
-    this.id = '';
-    this.email = '';
-    this.password = '';
-    this.name = '';
+    return this.hasMany('userSession', 'user_id');
 }
 
-module.exports = modelDefinition;
+module.exports = dbManager.model('user', model);

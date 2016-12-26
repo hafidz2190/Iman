@@ -2,7 +2,9 @@ var businessManagerMap = require('../business/index');
 
 var methodMap = {
     '/getCredential' : businessManagerMap.credentialManager.getCredential,
-    '/getUser' : businessManagerMap.userManager.getUser
+    '/getTransactionsByUser' : businessManagerMap.transactionManager.getTransactionsByUser,
+    '/getUser' : businessManagerMap.userManager.getUser,
+    '/getUserSession' : businessManagerMap.userManager.getUserSession
 };
 
 function managerDefinitions() 
