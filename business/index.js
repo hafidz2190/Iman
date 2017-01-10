@@ -1,7 +1,7 @@
 function managerDefinitions()
 {
     return {
-        credentialManager: require('./credentialManager'),
+        entityManager: require('./entityManager'),
         transactionManager: require('./transactionManager'),
         userManager: require('./userManager')
     };

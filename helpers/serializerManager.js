@@ -1,5 +1,25 @@
 function managerDefinitions() 
 {
+    function modelSerializer(result)
+    {
+        return new Promise((resolve, reject) => {
+            if(!result)
+                return resolve({data: []});
+
+            return resolve({data: serialize(result.attributes)});
+        });        
+    }
+
+    function collectionSerializer(result)
+    {
+        return new Promise((resolve, reject) => {
+            if(!result)
+                return resolve({data: []});
+
+            return resolve({data: serializeArray(result.models)});
+        });        
+    }    
+
     function serialize(data)
     {
         var serializedData = {};
@@ -13,6 +33,9 @@ function managerDefinitions()
     function serializeArray(data)
     {
         var serializedResults = [];
+
+        if(!data)
+            return serializedResults;
 
         for(var i = 0, ii = data.length; i < ii; i++)
         {
@@ -35,8 +58,8 @@ function managerDefinitions()
     }
 
     return {
-        serialize: serialize,
-        serializeArray: serializeArray
+        modelSerializer: modelSerializer,
+        collectionSerializer: collectionSerializer
     };
 }
 

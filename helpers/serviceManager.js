@@ -1,8 +1,14 @@
 var businessManagerMap = require('../business/index');
 
 var methodMap = {
-    '/getCredential' : businessManagerMap.credentialManager.getCredential,
-    '/getTransactionsByUser' : businessManagerMap.transactionManager.getTransactionsByUser,
+    '/getDropdownCollectionByProperty' : businessManagerMap.entityManager.getDropdownCollectionByProperty,
+    '/getEntityCollection' : businessManagerMap.entityManager.getEntityCollection,
+    '/getPropertyCollectionByEntity' : businessManagerMap.entityManager.getPropertyCollectionByEntity,
+    '/getWorkflowStatusCollectionByProperty' : businessManagerMap.entityManager.getWorkflowStatusCollectionByProperty,
+
+    '/getTransactionCollectionByUser' : businessManagerMap.transactionManager.getTransactionCollectionByUser,
+
+    '/getCredential' : businessManagerMap.userManager.getCredential,
     '/getUser' : businessManagerMap.userManager.getUser,
     '/getUserSession' : businessManagerMap.userManager.getUserSession
 };

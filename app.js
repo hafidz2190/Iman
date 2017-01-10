@@ -2,7 +2,7 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var appConfig = require('./config.json');
 
-var credentialService = require('./services/credentialService');
+var entityService = require('./services/entityService');
 var transactionService = require('./services/transactionService');
 var userService = require('./services/userService');
 
@@ -12,7 +12,7 @@ var port = appConfig.server.port;
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
-app.use('/credential', credentialService);
+app.use('/entity', entityService);
 app.use('/transaction', transactionService);
 app.use('/user', userService);
 

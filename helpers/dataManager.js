@@ -3,34 +3,31 @@ var modelMap = require('../models/index');
 
 function managerDefinitions() 
 {
-    function fetch(tableName, filterMap, callback)
+    function fetch(modelName, filterMap, callback)
     {
-        return new modelMap[tableName](filterMap).fetch().then(serializer).then(callback);
-
-        function serializer(result)
-        {
-            return new Promise((resolve, reject) => {
-                if(!result)
-                    return resolve([]);
-
-                return resolve(serializerManager.serialize(result.attributes));
-            });
-        }
+        return new modelMap[modelName](filterMap)
+            .fetch()
+            .then(serializerManager.modelSerializer)
+            .then(callback ? callback : defaultCallback);
     }
 
-    function fetchWithRelated(tableName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize, callback)
+    function fetchAll(modelName, callback)
     {
-        return new modelMap[tableName](forger).query(filterMap).query(orderByHandler).query(limitHandler).fetch({withRelated: relatedTableNames}).then(serializer).then(callback);
+        return new modelMap[modelName]()
+            .fetchAll()
+            .then(serializerManager.collectionSerializer)
+            .then(callback ? callback : defaultCallback);
+    }
 
-        function serializer(result)
-        {
-            return new Promise((resolve, reject) => {
-                if(!result)
-                    return resolve([]);
-
-                return resolve(serializerManager.serializeArray(result.models));
-            });
-        }
+    function fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize, callback)
+    {
+        return new modelMap[modelName](forger)
+            .query(filterMap)
+            .query(orderByHandler)
+            .query(limitHandler)
+            .fetch({withRelated: relatedTableNames})
+            .then(serializerManager.collectionSerializer)
+            .then(callback ? callback : defaultCallback);
 
         function orderByHandler(qb)
         {
@@ -50,8 +47,14 @@ function managerDefinitions()
         }
     }
 
+    function defaultCallback(result)
+    {
+        return result;
+    }
+
     return {
         fetch: fetch,
+        fetchAll: fetchAll,
         fetchWithRelated: fetchWithRelated
     };
 }
