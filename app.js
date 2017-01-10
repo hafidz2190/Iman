@@ -3,6 +3,7 @@ var bodyParser = require('body-parser');
 var appConfig = require('./config.json');
 
 var entityService = require('./services/entityService');
+var historyService = require('./services/historyService');
 var transactionService = require('./services/transactionService');
 var userService = require('./services/userService');
 
@@ -13,6 +14,7 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 
 app.use('/entity', entityService);
+app.use('/history', historyService);
 app.use('/transaction', transactionService);
 app.use('/user', userService);
 

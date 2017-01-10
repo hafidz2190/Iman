@@ -8,7 +8,7 @@ function managerDefinitions()
         var relatedTableNames = ['property'];
         var forger = null;
         var filterMap = {where: {property_id: data.property_id}};
-        var sortDescriptions =  null;
+        var sortDescriptions = null;
         var pageSize = null;
 
         return dataManager.fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize);
@@ -25,7 +25,7 @@ function managerDefinitions()
         var relatedTableNames = ['entity'];
         var forger = null;
         var filterMap = {where: {entity_id: data.entity_id}};
-        var sortDescriptions =  null;
+        var sortDescriptions = null;
         var pageSize = null;
 
         return dataManager.fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize);
@@ -37,7 +37,7 @@ function managerDefinitions()
         var relatedTableNames = ['property'];
         var forger = null;
         var filterMap = {where: {property_id: data.property_id}};
-        var sortDescriptions =  null;
+        var sortDescriptions = null;
         var pageSize = null;
 
         return dataManager.fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize);

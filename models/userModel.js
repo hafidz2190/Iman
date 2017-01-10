@@ -2,13 +2,19 @@ var dbManager = require('../helpers/dbManager');
 
 var model = dbManager.Model.extend({
     tableName: 'user',
-    transaction: transactionRelatedModelHandler,
+    history: historyRelatedModelHandler,
+    phTransaction: phTransactionRelatedModelHandler,
     userSession: userSessionRelatedModelHandler
 });
 
-function transactionRelatedModelHandler()
+function historyRelatedModelHandler()
 {
-    return this.hasMany('transaction', 'user_id');
+    return this.hasMany('history', 'user_id');
+}
+
+function phTransactionRelatedModelHandler()
+{
+    return this.hasMany('phTransaction', 'user_id');
 }
 
 function userSessionRelatedModelHandler()

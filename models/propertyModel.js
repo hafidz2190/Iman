@@ -4,6 +4,7 @@ var model = dbManager.Model.extend({
     tableName: 'property',
     dropdown: dropdownRelatedModelHandler,
     entity: entityRelatedModelHandler,
+    history: historyRelatedModelHandler,
     workflowStatus: workflowStatusRelatedModelHandler
 });
 
@@ -15,6 +16,11 @@ function dropdownRelatedModelHandler()
 function entityRelatedModelHandler()
 {
     return this.belongsTo('entity', 'entity_id');
+}
+
+function historyRelatedModelHandler()
+{
+    return this.hasMany('history', 'property_id');
 }
 
 function workflowStatusRelatedModelHandler()

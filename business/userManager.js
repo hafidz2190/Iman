@@ -24,7 +24,7 @@ function managerDefinitions()
         var relatedTableNames = ['user'];
         var forger = null;
         var filterMap = {where: {user_id: data.user_id}};
-        var sortDescriptions =  [{field: 'date', direction: 'desc'}];
+        var sortDescriptions = [{field: 'date', direction: 'desc'}];
         var pageSize = 1
 
         return dataManager.fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize);
