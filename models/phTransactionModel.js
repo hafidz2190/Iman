@@ -4,6 +4,7 @@ var model = dbManager.Model.extend({
     tableName: 'ph_transaction',
     ewallet: ewalletRelatedModelHandler,
     ghTransaction: ghTransactionRelatedModelHandler,
+    task: taskRelatedModelHandler,
     user: userRelatedModelHandler
 });
 
@@ -15,6 +16,11 @@ function ewalletRelatedModelHandler()
 function ghTransactionRelatedModelHandler()
 {
     return this.belongsTo('ghTransaction', 'gh_transaction_id');
+}
+
+function taskRelatedModelHandler()
+{
+    return this.hasMany('task', 'ph_transaction_id');
 }
 
 function userRelatedModelHandler()

@@ -14,6 +14,8 @@ function modelDefinitions()
         phTransactionCollection: require('./phTransactionCollection'),
         property: require('./propertyModel'),
         propertyCollection: require('./propertyCollection'),
+        task: require('./taskModel'),
+        taskCollection: require('./taskCollection'),
         user: require('./userModel'),
         userSession: require('./userSessionModel'),
         userSessionCollection: require('./userSessionCollection'),
