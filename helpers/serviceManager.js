@@ -8,6 +8,7 @@ var methodMap = {
 
     '/getHistoryCollectionByPropertyAndUser' : businessManagerMap.historyManager.getHistoryCollectionByPropertyAndUser,
 
+    '/getEwalletCollectionByUser' : businessManagerMap.transactionManager.getEwalletCollectionByUser,
     '/getGhTransactionCollectionByUser' : businessManagerMap.transactionManager.getGhTransactionCollectionByUser,
     '/getPhTransactionCollectionByUser' : businessManagerMap.transactionManager.getPhTransactionCollectionByUser,
 

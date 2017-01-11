@@ -1,4 +1,4 @@
-var serializerManager = require('./serializerManager');
+var dataProcessorManager = require('./dataProcessorManager');
 var modelMap = require('../models/index');
 
 function managerDefinitions() 
@@ -7,16 +7,35 @@ function managerDefinitions()
     {
         return new modelMap[modelName](filterMap)
             .fetch()
-            .then(serializerManager.modelSerializer)
+            .then(dataProcessorManager.modelSerializer)
             .then(callback ? callback : defaultCallback);
     }
 
-    function fetchAll(modelName, callback)
+    function fetchAll(modelName, sortDescriptions, pageSize, callback)
     {
         return new modelMap[modelName]()
+            .query(orderByHandler)
+            .query(limitHandler)
             .fetchAll()
-            .then(serializerManager.collectionSerializer)
+            .then(dataProcessorManager.collectionSerializer)
             .then(callback ? callback : defaultCallback);
+
+        function orderByHandler(qb)
+        {
+            if(!sortDescriptions)
+                return;
+            
+            for(var i = 0, ii = sortDescriptions.length; i < ii; i++)
+                qb.orderBy(sortDescriptions[i].field, sortDescriptions[i].direction);
+        }
+
+        function limitHandler(qb)
+        {
+            if(!pageSize)
+                return;
+
+            qb.limit(pageSize);
+        }
     }
 
     function fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize, callback)
@@ -26,7 +45,7 @@ function managerDefinitions()
             .query(orderByHandler)
             .query(limitHandler)
             .fetch({withRelated: relatedTableNames})
-            .then(serializerManager.collectionSerializer)
+            .then(dataProcessorManager.collectionSerializer)
             .then(callback ? callback : defaultCallback);
 
         function orderByHandler(qb)

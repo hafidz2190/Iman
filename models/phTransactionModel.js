@@ -2,9 +2,15 @@ var dbManager = require('../helpers/dbManager');
 
 var model = dbManager.Model.extend({
     tableName: 'ph_transaction',
+    ewallet: ewalletRelatedModelHandler,
     ghTransaction: ghTransactionRelatedModelHandler,
     user: userRelatedModelHandler
 });
+
+function ewalletRelatedModelHandler()
+{
+    return this.hasMany('ewallet', 'ph_transaction_id');
+}
 
 function ghTransactionRelatedModelHandler()
 {

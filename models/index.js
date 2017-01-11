@@ -4,6 +4,8 @@ function modelDefinitions()
         dropdown: require('./dropdownModel'),
         dropdownCollection: require('./dropdownCollection'),
         entity: require('./entityModel'),
+        ewallet: require('./ewalletModel'),
+        ewalletCollection: require('./ewalletCollection'),
         ghTransaction: require('./ghTransactionModel'),
         ghTransactionCollection: require('./ghTransactionCollection'),
         history: require('./historyModel'),

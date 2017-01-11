@@ -8,7 +8,7 @@ function managerDefinitions()
         var relatedTableNames = ['property'];
         var forger = null;
         var filterMap = {where: {property_id: data.property_id}};
-        var sortDescriptions = null;
+        var sortDescriptions = [{field: 'index', direction: 'asc'}];
         var pageSize = null;
 
         return dataManager.fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize);
@@ -16,7 +16,11 @@ function managerDefinitions()
 
     function getEntityCollection()
     {
-        return dataManager.fetchAll('entity');
+        var modelName = 'entity';
+        var sortDescriptions = [{field: 'name', direction: 'asc'}];
+        var pageSize = null;
+
+        return dataManager.fetchAll(modelName, sortDescriptions, pageSize);
     }
     
     function getPropertyCollectionByEntity(data)
@@ -25,7 +29,7 @@ function managerDefinitions()
         var relatedTableNames = ['entity'];
         var forger = null;
         var filterMap = {where: {entity_id: data.entity_id}};
-        var sortDescriptions = null;
+        var sortDescriptions = [{field: 'name', direction: 'asc'}];
         var pageSize = null;
 
         return dataManager.fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize);
@@ -37,7 +41,7 @@ function managerDefinitions()
         var relatedTableNames = ['property'];
         var forger = null;
         var filterMap = {where: {property_id: data.property_id}};
-        var sortDescriptions = null;
+        var sortDescriptions = [{field: 'index', direction: 'asc'}];
         var pageSize = null;
 
         return dataManager.fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize);
