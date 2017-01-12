@@ -38,9 +38,9 @@ function managerDefinitions()
         }
     }
 
-    function fetchWithRelated(modelName, relatedTableNames, forger, filterMap, sortDescriptions, pageSize, callback)
+    function fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize, callback)
     {
-        return new modelMap[modelName](forger)
+        return new modelMap[modelName]()
             .query(filterMap)
             .query(orderByHandler)
             .query(limitHandler)

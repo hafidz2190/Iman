@@ -10,8 +10,11 @@ var methodMap = {
     '/getHistoryCollectionByReference' : businessManagerMap.historyManager.getHistoryCollectionByReference,
 
     '/getEwalletCollectionByUser' : businessManagerMap.transactionManager.getEwalletCollectionByUser,
+    '/getGhTransactionCollection' : businessManagerMap.transactionManager.getGhTransactionCollection,
     '/getGhTransactionCollectionByUser' : businessManagerMap.transactionManager.getGhTransactionCollectionByUser,
+    '/getPhTransactionCollection' : businessManagerMap.transactionManager.getPhTransactionCollection,
     '/getPhTransactionCollectionByUser' : businessManagerMap.transactionManager.getPhTransactionCollectionByUser,
+    '/getTaskCollection' : businessManagerMap.transactionManager.getTaskCollection,
     '/getTaskCollectionByUser' : businessManagerMap.transactionManager.getTaskCollectionByUser,
 
     '/getCredential' : businessManagerMap.userManager.getCredential,
