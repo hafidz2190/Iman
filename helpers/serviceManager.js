@@ -12,6 +12,8 @@ var methodMap = {
     '/getEwalletCollectionByUser' : businessManagerMap.transactionManager.getEwalletCollectionByUser,
     '/getGhTransactionCollection' : businessManagerMap.transactionManager.getGhTransactionCollection,
     '/getGhTransactionCollectionByUser' : businessManagerMap.transactionManager.getGhTransactionCollectionByUser,
+    '/getManagerTestCollection' : businessManagerMap.transactionManager.getManagerTestCollection,
+    '/getManagerTestCollectionByUser' : businessManagerMap.transactionManager.getManagerTestCollectionByUser,
     '/getPhTransactionCollection' : businessManagerMap.transactionManager.getPhTransactionCollection,
     '/getPhTransactionCollectionByUser' : businessManagerMap.transactionManager.getPhTransactionCollectionByUser,
     '/getTaskCollection' : businessManagerMap.transactionManager.getTaskCollection,

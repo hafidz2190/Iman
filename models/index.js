@@ -10,6 +10,8 @@ function modelDefinitions()
         ghTransactionCollection: require('./ghTransactionCollection'),
         history: require('./historyModel'),
         historyCollection: require('./historyCollection'),
+        managerTest: require('./managerTestModel'),
+        managerTestCollection: require('./managerTestCollection'),
         phTransaction: require('./phTransactionModel'),
         phTransactionCollection: require('./phTransactionCollection'),
         property: require('./propertyModel'),

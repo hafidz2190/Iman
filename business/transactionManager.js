@@ -41,6 +41,28 @@ function managerDefinitions()
         return dataManager.fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize);
     }
 
+    function getManagerTestCollection(data)
+    {
+        var modelName = 'managerTestCollection';
+        var relatedTableNames = ['user'];
+        var filterMap = {};
+        var sortDescriptions = [{field: 'date', direction: 'desc'}];
+        var pageSize = null;
+
+        return dataManager.fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize);
+    }
+
+    function getManagerTestCollectionByUser(data)
+    {
+        var modelName = 'managerTestCollection';
+        var relatedTableNames = ['user'];
+        var filterMap = {where: {user_id: data.user_id}};
+        var sortDescriptions = [{field: 'date', direction: 'desc'}];
+        var pageSize = null;
+
+        return dataManager.fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize);
+    }    
+
     function getPhTransactionCollection(data)
     {
         var modelName = 'phTransactionCollection';
@@ -99,6 +121,8 @@ function managerDefinitions()
         getEwalletCollectionByUser: getEwalletCollectionByUser,
         getGhTransactionCollection: getGhTransactionCollection,
         getGhTransactionCollectionByUser: getGhTransactionCollectionByUser,
+        getManagerTestCollection: getManagerTestCollection,
+        getManagerTestCollectionByUser: getManagerTestCollectionByUser,
         getPhTransactionCollection: getPhTransactionCollection,
         getPhTransactionCollectionByUser: getPhTransactionCollectionByUser,
         getTaskCollection: getTaskCollection,

@@ -4,6 +4,7 @@ var model = dbManager.Model.extend({
     tableName: 'user',
     ewallet: ewalletRelatedModelHandler,
     history: historyRelatedModelHandler,
+    managerTest: managerTestRelatedModelHandler,
     phTransaction: phTransactionRelatedModelHandler,
     task: taskRelatedModelHandler,
     userSession: userSessionRelatedModelHandler
@@ -17,6 +18,11 @@ function ewalletRelatedModelHandler()
 function historyRelatedModelHandler()
 {
     return this.hasMany('history', 'user_id');
+}
+
+function managerTestRelatedModelHandler()
+{
+    return this.hasMany('managerTest', 'user_id');
 }
 
 function phTransactionRelatedModelHandler()

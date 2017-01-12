@@ -7,6 +7,8 @@ var requestHandler = serviceManager.requestHandler;
 router.post('/getEwalletCollectionByUser', requestHandler); //{user_id: ''}
 router.post('/getGhTransactionCollection', requestHandler); //{}
 router.post('/getGhTransactionCollectionByUser', requestHandler); //{user_id: ''}
+router.post('/getManagerTestCollection', requestHandler); //{}
+router.post('/getManagerTestCollectionByUser', requestHandler); //{user_id: ''}
 router.post('/getPhTransactionCollection', requestHandler); //{}
 router.post('/getPhTransactionCollectionByUser', requestHandler); //{user_id: ''}
 router.post('/getTaskCollection', requestHandler); //{}
