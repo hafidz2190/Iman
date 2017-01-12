@@ -5,5 +5,6 @@ var router = express.Router();
 var requestHandler = serviceManager.requestHandler;
 
 router.post('/getHistoryCollectionByPropertyAndUser', requestHandler); //{property_id: '', user_id: ''}
+router.post('/getHistoryCollectionByReference', requestHandler); //{reference_id: ''}
 
 module.exports = router;

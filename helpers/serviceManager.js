@@ -7,6 +7,7 @@ var methodMap = {
     '/getWorkflowStatusCollectionByProperty' : businessManagerMap.entityManager.getWorkflowStatusCollectionByProperty,
 
     '/getHistoryCollectionByPropertyAndUser' : businessManagerMap.historyManager.getHistoryCollectionByPropertyAndUser,
+    '/getHistoryCollectionByReference' : businessManagerMap.historyManager.getHistoryCollectionByReference,
 
     '/getEwalletCollectionByUser' : businessManagerMap.transactionManager.getEwalletCollectionByUser,
     '/getGhTransactionCollectionByUser' : businessManagerMap.transactionManager.getGhTransactionCollectionByUser,
@@ -15,6 +16,7 @@ var methodMap = {
 
     '/getCredential' : businessManagerMap.userManager.getCredential,
     '/getUser' : businessManagerMap.userManager.getUser,
+    '/getUserCollection' : businessManagerMap.userManager.getUserCollection,
     '/getUserSession' : businessManagerMap.userManager.getUserSession
 };
 

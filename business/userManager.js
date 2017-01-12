@@ -18,6 +18,15 @@ function managerDefinitions()
         return dataManager.fetch(modelName, filterMap);
     }
 
+    function getUserCollection(data)
+    {
+        var modelName = 'user';
+        var sortDescriptions = [{field: 'email', direction: 'asc'}];
+        var pageSize = null;
+
+        return dataManager.fetchAll(modelName, sortDescriptions, pageSize);
+    }
+
     function getUserSession(data)
     {
         var modelName = 'userSessionCollection';
@@ -33,6 +42,7 @@ function managerDefinitions()
     return {
         getCredential: getCredential,
         getUser: getUser,
+        getUserCollection: getUserCollection,
         getUserSession: getUserSession
     };
 }
