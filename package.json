@@ -1,19 +1,22 @@
 {
-    "name": "iman",
-    "version": "1.0.0",
-    "description": "",
-    "main": "app.js",
-    "scripts": {
-        "start": "node app.js",
-        "test": "echo \"Error: no test specified\" && exit 1"
-    },
-    "author": "hafidz2190",
-    "license": "ISC",
-    "dependencies": {
-        "express": "latest",
-        "mysql": "latest",
-        "knex": "latest",
-        "bookshelf": "latest",
-        "body-parser": "latest"
-    }
+  "name": "iman",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "hafidz2190",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "latest",
+    "bookshelf": "latest",
+    "bookshelf-uuid": "latest",
+    "express": "latest",
+    "knex": "latest",
+    "mysql": "latest",
+    "uuid": "latest",
+    "bookshelf-transaction-manager": "latest"
+  }
 }

@@ -3,6 +3,11 @@ var dataProcessorManager = require('../helpers/dataProcessorManager');
 
 function managerDefinitions() 
 {
+    function createManagerTest(data)
+    {
+        return dataManager.save('managerTest', data);
+    }
+
     function getEwalletCollectionByUser(data)
     {
         var modelName = 'phTransactionCollection';
@@ -118,6 +123,7 @@ function managerDefinitions()
     }
 
     return {
+        createManagerTest: createManagerTest,
         getEwalletCollectionByUser: getEwalletCollectionByUser,
         getGhTransactionCollection: getGhTransactionCollection,
         getGhTransactionCollectionByUser: getGhTransactionCollectionByUser,

@@ -66,6 +66,14 @@ function managerDefinitions()
         }
     }
 
+    function save(modelName, forger, callback)
+    {
+        return new modelMap[modelName](forger)
+            .save()
+            .then(dataProcessorManager.modelSerializer)
+            .then(callback ? callback : defaultCallback);        
+    }
+
     function defaultCallback(result)
     {
         return result;
@@ -74,7 +82,8 @@ function managerDefinitions()
     return {
         fetch: fetch,
         fetchAll: fetchAll,
-        fetchWithRelated: fetchWithRelated
+        fetchWithRelated: fetchWithRelated,
+        save: save
     };
 }
 
