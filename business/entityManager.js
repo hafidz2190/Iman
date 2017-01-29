@@ -2,53 +2,19 @@ var dataManager = require('../helpers/dataManager');
 
 function managerDefinitions() 
 {
-    function getDropdownCollectionByProperty(data)
+    function getEntityByName(entityName, transactionScope)
     {
-        var modelName = 'dropdownCollection';
-        var relatedTableNames = ['property'];
-        var filterMap = {where: {property_id: data.property_id}};
-        var sortDescriptions = [{field: 'index', direction: 'asc'}];
-        var pageSize = null;
-
-        return dataManager.fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize);
+        return dataManager.fetch('entity', {name: entityName}, transactionScope);
     }
 
-    function getEntityCollection()
+    function getPropertyCollectionByEntityId(entityId, transactionScope)
     {
-        var modelName = 'entity';
-        var sortDescriptions = [{field: 'name', direction: 'asc'}];
-        var pageSize = null;
-
-        return dataManager.fetchAll(modelName, sortDescriptions, pageSize);
-    }
-    
-    function getPropertyCollectionByEntity(data)
-    {
-        var modelName = 'propertyCollection';
-        var relatedTableNames = ['entity'];
-        var filterMap = {where: {entity_id: data.entity_id}};
-        var sortDescriptions = [{field: 'name', direction: 'asc'}];
-        var pageSize = null;
-
-        return dataManager.fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize);
-    }
-
-    function getWorkflowStatusCollectionByProperty(data)
-    {
-        var modelName = 'workflowStatusCollection';
-        var relatedTableNames = ['property'];
-        var filterMap = {where: {property_id: data.property_id}};
-        var sortDescriptions = [{field: 'index', direction: 'asc'}];
-        var pageSize = null;
-
-        return dataManager.fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize);
+        return dataManager.fetchWithRelated('propertyCollection', ['entity'], {where: {entity_id: entityId}}, null, null, null, transactionScope);
     }
 
     return {
-        getDropdownCollectionByProperty: getDropdownCollectionByProperty,
-        getEntityCollection: getEntityCollection,
-        getPropertyCollectionByEntity: getPropertyCollectionByEntity,
-        getWorkflowStatusCollectionByProperty: getWorkflowStatusCollectionByProperty
+        getEntityByName: getEntityByName,
+        getPropertyCollectionByEntityId: getPropertyCollectionByEntityId,
     };
 }
 

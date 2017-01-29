@@ -2,6 +2,7 @@ var dbManager = require('../helpers/dbManager');
 
 var model = dbManager.Model.extend({
     tableName: 'task',
+    uuid: true,
     phTransaction: phTransactionRelatedModelHandler,
     user: userRelatedModelHandler
 });

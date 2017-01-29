@@ -17,6 +17,10 @@
     "knex": "latest",
     "mysql": "latest",
     "uuid": "latest",
-    "bookshelf-transaction-manager": "latest"
+    "bookshelf-transaction-manager": "latest",
+    "dateformat": "latest",
+    "cookie-parser": "latest",
+    "nodemailer": "0.7.1",
+    "node-cron": "latest"
   }
 }

@@ -1,41 +1,94 @@
-var businessManagerMap = require('../business/index');
+var serviceMap = require('../services/index');
 
 var methodMap = {
-    '/getDropdownCollectionByProperty' : businessManagerMap.entityManager.getDropdownCollectionByProperty,
-    '/getEntityCollection' : businessManagerMap.entityManager.getEntityCollection,
-    '/getPropertyCollectionByEntity' : businessManagerMap.entityManager.getPropertyCollectionByEntity,
-    '/getWorkflowStatusCollectionByProperty' : businessManagerMap.entityManager.getWorkflowStatusCollectionByProperty,
-
-    '/getHistoryCollectionByPropertyAndUser' : businessManagerMap.historyManager.getHistoryCollectionByPropertyAndUser,
-    '/getHistoryCollectionByReference' : businessManagerMap.historyManager.getHistoryCollectionByReference,
-
-    '/createManagerTest' : businessManagerMap.transactionManager.createManagerTest,
-    '/getEwalletCollectionByUser' : businessManagerMap.transactionManager.getEwalletCollectionByUser,
-    '/getGhTransactionCollection' : businessManagerMap.transactionManager.getGhTransactionCollection,
-    '/getGhTransactionCollectionByUser' : businessManagerMap.transactionManager.getGhTransactionCollectionByUser,
-    '/getManagerTestCollection' : businessManagerMap.transactionManager.getManagerTestCollection,
-    '/getManagerTestCollectionByUser' : businessManagerMap.transactionManager.getManagerTestCollectionByUser,
-    '/getPhTransactionCollection' : businessManagerMap.transactionManager.getPhTransactionCollection,
-    '/getPhTransactionCollectionByUser' : businessManagerMap.transactionManager.getPhTransactionCollectionByUser,
-    '/getTaskCollection' : businessManagerMap.transactionManager.getTaskCollection,
-    '/getTaskCollectionByUser' : businessManagerMap.transactionManager.getTaskCollectionByUser,
-
-    '/getCredential' : businessManagerMap.userManager.getCredential,
-    '/getUser' : businessManagerMap.userManager.getUser,
-    '/getUserCollection' : businessManagerMap.userManager.getUserCollection,
-    '/getUserSession' : businessManagerMap.userManager.getUserSession
+    '/createUser': {method: serviceMap.userService.createUserService, serializer: 3},
+    '/getUser': {method: serviceMap.userService.getUserService, serializer: 3},
+    '/getCredential': {method: serviceMap.userService.getCredentialService, serializer: 2}
 };
 
-function managerDefinitions() 
+function managerDefinitions()
 {
-    function requestHandler(req, res)
+    function requestHandler(req, res, next)
     {
-        methodMap[req.url](req.body).then(callback);
+        var method = methodMap[req.url].method;
+        var serializer = defaultSerializer;
+        var data = req.body;
+        data = sanitizeRequestParam(data);
 
-        function callback(result)
+        switch (methodMap[req.url].serializer) 
+        {
+            case 1:
+                serializer = collectionSerializer
+                break;
+            case 3:
+                serializer = modelSerializer
+                break;
+            default:
+                serializer = defaultSerializer;
+                break;
+        }
+
+        method(data)
+            .then(serializer)
+            .then(successCallback)
+            .catch(errorCallback);
+
+        function successCallback(result)
         {
             res.send(result);
         }
+
+        function errorCallback(result)
+        {
+            next(result);
+        }
+    }
+    
+    function collectionSerializer(result)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if(!result)
+                return resolve({data: []});
+
+            return resolve({data: result.toJSON()});
+        });
+    }
+
+    function defaultSerializer(result)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if(!result)
+                return resolve({data: []});
+
+            return resolve({data: [result]});
+        });
+    }
+
+    function modelSerializer(result)
+    {
+        return new Promise((resolve, reject) =>
+        {
+            if(!result)
+                return resolve({data: []});
+
+            return resolve({data: [result.toJSON()]});
+        });
+    }
+
+    function sanitizeRequestParam(data)
+    {
+        if(!('queryConfig' in data))
+            data.queryConfig = {};
+
+        if(!('propertyMap' in data))
+            data.propertyMap = {};
+
+        if(!('userSessionMap' in data))
+            data.userSessionMap = {};
+
+        return data;
     }
     
     return {

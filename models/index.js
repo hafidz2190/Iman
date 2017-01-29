@@ -12,6 +12,8 @@ function modelDefinitions()
         historyCollection: require('./historyCollection'),
         managerTest: require('./managerTestModel'),
         managerTestCollection: require('./managerTestCollection'),
+        outgoingEmail: require('./outgoingEmailModel'),
+        outgoingEmailCollection: require('./outgoingEmailCollection'),
         phTransaction: require('./phTransactionModel'),
         phTransactionCollection: require('./phTransactionCollection'),
         property: require('./propertyModel'),

@@ -1,12 +1,27 @@
-var express = require('express');
-var serviceManager = require('../helpers/serviceManager');
+var userManager = require('../business/userManager');
 
-var router = express.Router();
-var requestHandler = serviceManager.requestHandler;
+function serviceDefinitions() 
+{
+    function createUserService(data)
+    {
+        return userManager.createUserService(data);
+    }
 
-router.post('/getCredential', requestHandler); //{email: '', password: ''}
-router.post('/getUser', requestHandler); //{email: ''}
-router.post('/getUserCollection', requestHandler); //{}
-router.post('/getUserSession', requestHandler); //{user_id: ''}
+    function getUserService(data)
+    {
+        return userManager.getUserService(data);
+    }
 
-module.exports = router;
+    function getCredentialService(data)
+    {
+        return userManager.getCredentialService(data);
+    }
+
+    return {
+        createUserService: createUserService,
+        getUserService: getUserService,
+        getCredentialService: getCredentialService
+    };
+}
+
+module.exports = serviceDefinitions();

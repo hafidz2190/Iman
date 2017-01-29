@@ -2,6 +2,7 @@ var dbManager = require('../helpers/dbManager');
 
 var model = dbManager.Model.extend({
     tableName: 'ph_transaction',
+    uuid: true,
     ewallet: ewalletRelatedModelHandler,
     ghTransaction: ghTransactionRelatedModelHandler,
     task: taskRelatedModelHandler,

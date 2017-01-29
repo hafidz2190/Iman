@@ -2,6 +2,7 @@ var dbManager = require('../helpers/dbManager');
 
 var model = dbManager.Model.extend({
     tableName: 'property',
+    uuid: true,
     dropdown: dropdownRelatedModelHandler,
     entity: entityRelatedModelHandler,
     history: historyRelatedModelHandler,
