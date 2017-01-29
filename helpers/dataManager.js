@@ -1,4 +1,4 @@
-var dateFormat = require('dateFormat');
+var dateFormat = require('dateformat');
 var dbManager = require('../helpers/dbManager');
 var modelMap = require('../models/index');
 
