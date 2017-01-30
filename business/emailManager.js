@@ -6,28 +6,26 @@ function managerDefinitions()
 {
     function sendEmail(to, subject, body)
     {
-        var transporter = nodemailer.createTransport('SMTP', appConfig.smtp);
+        var transporter = nodemailer.createTransport(appConfig.smtp.transporter);
         var mailOptions = {
-            from: appConfig.smtp.auth.XOAuth2.user,
+            from: appConfig.smtp.transporter.auth.user,
             to: to,
             subject: subject,
-            html: body,
-            generateTextFromHTML: true
+            html: body
         }
 
-        transporter.sendMail(mailOptions, callback);
-
-        function callback(error, response)
+        return new Promise((resolve, reject) =>
         {
-            return new Promise((resolve, reject) =>
+            transporter.sendMail(mailOptions, (error, result) =>
             {
+                transporter.close();
+
                 if(error)
                     return reject(error);
-
-                return resolve(response);
-            })
-            
-        }
+                
+                return resolve(result);
+            });
+        });
     }
 
     function createOutgoingEmail(to, subject, body, transactionScope)

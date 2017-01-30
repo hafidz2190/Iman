@@ -13,14 +13,14 @@
         "port": "9999"
     },
     "smtp": {
-        "service": "gmail",
-        "auth": {
-            "XOAuth2": {
-                "user": "hafidz2190@gmail.com",
-                "clientId": "1090664612853-stn4ipqq0gfji80e4hl7j1rvnvaobbvr.apps.googleusercontent.com",
-                "clientSecret": "JA_w1VjMBQt7SaguxUhiQ8l2",
-                "refreshToken": "1/MTkNtCVCuhRCGehSNR5pszVcmk8vzVMlBzgof-Hfk3M"
-            }
+        "transporter": {
+            "host": "smtp.gmail.com",
+            "port": "465",
+            "secure": "true",
+            "auth": {
+                "user": "mmmiman.sender.01@gmail.com",
+                "pass": "BismillahTest88"
+            }            
         }
     },
     "userSessionTimeout": "600000"

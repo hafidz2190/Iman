@@ -20,7 +20,7 @@
     "bookshelf-transaction-manager": "latest",
     "dateformat": "latest",
     "cookie-parser": "latest",
-    "nodemailer": "0.7.1",
+    "nodemailer": "latest",
     "node-cron": "latest"
   }
 }
