@@ -1,7 +1,8 @@
 function modelDefinition()
 {
     var _dbManager = require('../helpers/dbManager');
-    var _tableName = 'ewallet';
+    var _modelName = 'ewallet';
+    var _tableName = 'b_ewallet';
 
     var _model = _dbManager.Model.extend({
         tableName: _tableName,
@@ -12,15 +13,15 @@ function modelDefinition()
 
     function phTransactionRelatedModelHandler()
     {
-        return this.belongsTo('phTransaction', 'ph_transaction_id');
+        return this.belongsTo('phTransaction', 'b_ph_transaction_id');
     }
 
     function userRelatedModelHandler()
     {
-        return this.belongsTo('user', 'user_id').through('phTransaction', 'ph_transaction_id');
+        return this.belongsTo('user', 's_user_id').through('phTransaction', 'b_ph_transaction_id');
     }
 
-    return _dbManager.model(_tableName, _model);
+    return _dbManager.model(_modelName, _model);
 }
 
 module.exports = modelDefinition();

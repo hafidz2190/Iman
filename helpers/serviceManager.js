@@ -3,7 +3,7 @@ function serviceManager()
     var _serviceMap = require('../services/index');
 
     var _methodMap = {
-        '/createUser': {method: _serviceMap.userService.createUserService, serializer: 3},
+        '/createUser': {method: _serviceMap.userService.createUserService, serializer: 2},
         '/getUser': {method: _serviceMap.userService.getUserService, serializer: 3},
         '/getCredential': {method: _serviceMap.userService.getCredentialService, serializer: 2}
     };

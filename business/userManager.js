@@ -6,8 +6,8 @@ function userManager()
     var _entityManager = require('../business/entityManager');
     var _errorMessageManager = require('../helpers/errorMessageManager');
 
-    var _globalErrorMap = _errorMessageManager.global;
-    var _userManagerErrorMap = _errorMessageManager.userManager;
+    var _globalErrorMap = _errorMessageManager.errorMessageMap.global;
+    var _userManagerErrorMap = _errorMessageManager.errorMessageMap.userManager;
 
     var _outgoingEmailTemplateTypeMap = _emailManager.getOutgoingEmailTemplateTypeMap();
 
@@ -36,6 +36,9 @@ function userManager()
                 promise2
                 .then(function(model2)
                 {
+                    if(!model2)
+                        throw new Error(_errorMessageManager.formatError(_globalErrorMap.illegalEntity, ['user']));
+
                     var entityId = model2.get('id');
                     var promise3 = _entityManager.getPropertyCollectionByEntityId(entityId, transactionScope);
 
@@ -63,7 +66,7 @@ function userManager()
 
                             var newUserSessionModel = {
                                 date: _dataManager.getDateTimeNow(),
-                                user_id: createdUserId
+                                s_user_id: createdUserId
                             };
                             
                             var promise5 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
@@ -71,16 +74,19 @@ function userManager()
                             promise5
                             .then(function(model5)
                             {
+                                var sessionId = model5.get('id');
                                 var promise6 = _emailManager.createOutgoingEmailFromTemplate(data.propertyMap.email, _outgoingEmailTemplateTypeMap.userManager.createUser, transactionScope);
 
                                 promise6
                                 .then(function(model6)
                                 {
-                                    var promise7 = getUserByEmail(data.propertyMap.email, transactionScope);
-
-                                    return promise7;
+                                    return new Promise((resolve, reject) =>
+                                    {
+                                        return resolve({s_user_id: createdUserId, s_session_id: sessionId});
+                                    })
+                                    .then(transactionScope.commit)
+                                    .catch(transactionScope.rollback);
                                 })
-                                .then(transactionScope.commit)
                                 .catch(transactionScope.rollback);
                             })
                             .catch(transactionScope.rollback);
@@ -182,7 +188,7 @@ function userManager()
                         {
                             return new Promise((resolve, reject) =>
                             {
-                                return resolve({user_id: userId, session_id: sessionId});
+                                return resolve({s_user_id: userId, s_session_id: sessionId});
                             })
                             .then(transactionScope.commit)
                             .catch(transactionScope.rollback);
@@ -191,7 +197,7 @@ function userManager()
 
                     var newUserSessionModel = {
                         date: _dataManager.getDateTimeNow(),
-                        user_id: userId
+                        s_user_id: userId
                     };
                     
                     var promise3 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
@@ -203,7 +209,7 @@ function userManager()
                         
                         return new Promise((resolve, reject) =>
                         {
-                            return resolve({user_id: userId, session_id: createdUserSessionId});
+                            return resolve({s_user_id: userId, s_session_id: createdUserSessionId});
                         });
                     })
                     .then(transactionScope.commit)
@@ -222,12 +228,12 @@ function userManager()
 
     function getUserSessionByUserId(userId, transactionScope)
     {
-        return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {user_id: userId}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
+        return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {s_user_id: userId}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
     }
 
     function getUserSessionByUserSessionMap(userSessionMap, transactionScope)
     {
-        return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {id: userSessionMap.session_id, user_id: userSessionMap.user_id}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
+        return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {id: userSessionMap.s_session_id, s_user_id: userSessionMap.s_user_id}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
     }
 
     function userSessionIsValid(lastUserSessionDate)

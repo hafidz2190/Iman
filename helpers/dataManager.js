@@ -1,8 +1,11 @@
 function dataManager() 
 {
+    var _errorMessageManager = require('../helpers/errorMessageManager');
     var _dateFormat = require('dateformat');
     var _dbManager = require('../helpers/dbManager');
     var _modelMap = require('../models/index');
+
+    var _globalErrorMap = _errorMessageManager.errorMessageMap.global;
 
     function fetch(modelName, filterMap, transactionScope)
     {
@@ -91,7 +94,7 @@ function dataManager()
 
         for(var propertyName in requestPropertyMap)
             if(!(propertyName in databasePropertyMap))
-                throw new Error('Illegal property ' + propertyName + ' in entity ' + entityName);
+                throw new Error(_errorMessageManager.formatError(_globalErrorMap.illegalProperty, [propertyName, entityName]));
     }
 
     function getDateTimeNow()

@@ -1,7 +1,8 @@
 function modelDefinition()
 {
     var _dbManager = require('../helpers/dbManager');
-    var _tableName = 'property';
+    var _modelName = 'property';
+    var _tableName = 's_property';
 
     var _model = _dbManager.Model.extend({
         tableName: _tableName,
@@ -14,25 +15,25 @@ function modelDefinition()
 
     function dropdownRelatedModelHandler()
     {
-        return this.hasMany('dropdown', 'property_id');
+        return this.hasMany('dropdown', 's_property_id');
     }
 
     function entityRelatedModelHandler()
     {
-        return this.belongsTo('entity', 'entity_id');
+        return this.belongsTo('entity', 's_entity_id');
     }
 
     function historyRelatedModelHandler()
     {
-        return this.hasMany('history', 'property_id');
+        return this.hasMany('history', 's_property_id');
     }
 
     function workflowStatusRelatedModelHandler()
     {
-        return this.hasMany('workflowStatus', 'property_id');
+        return this.hasMany('workflowStatus', 's_property_id');
     }
 
-    return _dbManager.model(_tableName, _model);
+    return _dbManager.model(_modelName, _model);
 }
 
 module.exports = modelDefinition();

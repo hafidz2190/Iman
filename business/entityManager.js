@@ -9,7 +9,7 @@ function entityManager()
 
     function getPropertyCollectionByEntityId(entityId, transactionScope)
     {
-        return _dataManager.fetchWithRelated('propertyCollection', ['entity'], {where: {entity_id: entityId}}, null, null, null, transactionScope);
+        return _dataManager.fetchWithRelated('propertyCollection', ['entity'], {where: {s_entity_id: entityId}}, null, null, null, transactionScope);
     }
 
     return {
