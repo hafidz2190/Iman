@@ -45,7 +45,7 @@ function userManager()
                     promise3
                     .then(function(model3)
                     {
-                        var properties = model3.toJSON();
+                        var properties = !model3 ? [] : model3.toJSON();
                         _dataManager.validateProperties('user', properties, data.propertyMap);
 
                         var newUserModel = {
