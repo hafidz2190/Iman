@@ -1,20 +1,26 @@
-var dbManager = require('../helpers/dbManager');
-
-var model = dbManager.Model.extend({
-    tableName: 'gh_transaction',
-    uuid: true,
-    phTransaction: phTransactionRelatedModelHandler,
-    user: userRelatedModelHandler
-});
-
-function phTransactionRelatedModelHandler()
+function modelDefinition()
 {
-    return this.hasMany('phTransaction', 'gh_transaction_id');
+    var _dbManager = require('../helpers/dbManager');
+    var _tableName = 'ghTransaction';
+
+    var _model = _dbManager.Model.extend({
+        tableName: _tableName,
+        uuid: true,
+        phTransaction: phTransactionRelatedModelHandler,
+        user: userRelatedModelHandler
+    });
+
+    function phTransactionRelatedModelHandler()
+    {
+        return this.hasMany('phTransaction', 'gh_transaction_id');
+    }
+
+    function userRelatedModelHandler()
+    {
+        return this.belongsTo('user', 'user_id');
+    }
+
+    return _dbManager.model(_tableName, _model);
 }
 
-function userRelatedModelHandler()
-{
-    return this.belongsTo('user', 'user_id');
-}
-
-module.exports = dbManager.model('ghTransaction', model);
+module.exports = modelDefinition();

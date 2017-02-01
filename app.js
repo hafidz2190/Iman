@@ -25,14 +25,14 @@ function listenCallback()
 
 function allowCors(req, res, next)
 {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  res.header('Access-Control-Allow-Credentials', true);
-  next();
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+    res.header('Access-Control-Allow-Credentials', true);
+    next();
 }
 
 function errorHandler(err, req, res, next)
 {
-  res.status(500);
-  res.send(err.stack);
+    res.status(500);
+    res.send(err.stack);
 }

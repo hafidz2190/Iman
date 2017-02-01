@@ -1,21 +1,21 @@
-var serviceMap = require('../services/index');
-
-var methodMap = {
-    '/createUser': {method: serviceMap.userService.createUserService, serializer: 3},
-    '/getUser': {method: serviceMap.userService.getUserService, serializer: 3},
-    '/getCredential': {method: serviceMap.userService.getCredentialService, serializer: 2}
-};
-
-function managerDefinitions()
+function serviceManager()
 {
+    var _serviceMap = require('../services/index');
+
+    var _methodMap = {
+        '/createUser': {method: _serviceMap.userService.createUserService, serializer: 3},
+        '/getUser': {method: _serviceMap.userService.getUserService, serializer: 3},
+        '/getCredential': {method: _serviceMap.userService.getCredentialService, serializer: 2}
+    };
+
     function requestHandler(req, res, next)
     {
-        var method = methodMap[req.url].method;
+        var method = _methodMap[req.url].method;
         var serializer = defaultSerializer;
         var data = req.body;
         data = sanitizeRequestParam(data);
 
-        switch (methodMap[req.url].serializer) 
+        switch (_methodMap[req.url].serializer) 
         {
             case 1:
                 serializer = collectionSerializer
@@ -96,4 +96,4 @@ function managerDefinitions()
     };
 }
 
-module.exports = managerDefinitions();
+module.exports = serviceManager();

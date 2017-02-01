@@ -1,9 +1,13 @@
-var appConfig = require('../config.json');
-var knex = require('knex')(appConfig.database);
-var bookshelf = require('bookshelf')(knex);
-var uuid = require('bookshelf-uuid');
+function dbManager()
+{
+    var _appConfig = require('../config.json');
+    var _knex = require('knex')(_appConfig.database);
+    var _bookshelf = require('bookshelf')(_knex);
+    var _uuid = require('bookshelf-uuid');
 
-bookshelf.plugin('registry');
-bookshelf.plugin(uuid);
+    _bookshelf.plugin('registry');
+    _bookshelf.plugin(_uuid);
 
-module.exports = bookshelf;
+    return _bookshelf;
+}
+module.exports = dbManager();

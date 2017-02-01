@@ -1,15 +1,15 @@
-var dataManager = require('../helpers/dataManager');
-
-function managerDefinitions() 
+function entityManager() 
 {
+    var _dataManager = require('../helpers/dataManager');
+
     function getEntityByName(entityName, transactionScope)
     {
-        return dataManager.fetch('entity', {name: entityName}, transactionScope);
+        return _dataManager.fetch('entity', {name: entityName}, transactionScope);
     }
 
     function getPropertyCollectionByEntityId(entityId, transactionScope)
     {
-        return dataManager.fetchWithRelated('propertyCollection', ['entity'], {where: {entity_id: entityId}}, null, null, null, transactionScope);
+        return _dataManager.fetchWithRelated('propertyCollection', ['entity'], {where: {entity_id: entityId}}, null, null, null, transactionScope);
     }
 
     return {
@@ -18,4 +18,4 @@ function managerDefinitions()
     };
 }
 
-module.exports = managerDefinitions();
+module.exports = entityManager();

@@ -1,27 +1,27 @@
-var appConfig = require('../config.json');
-var dataManager = require('../helpers/dataManager');
-var entityManager = require('../business/entityManager');
-var errorMessageManager = require('../helpers/errorMessageManager');
-var emailManager = require('../business/emailManager');
-
-var globalError = errorMessageManager.global;
-var userManagerError = errorMessageManager.userManager;
-
-var outgoingEmailTemplateTypeMap = emailManager.getOutgoingEmailTemplateTypeMap();
-
-function managerDefinitions() 
+function userManager() 
 {
+    var _appConfig = require('../config.json');
+    var _dataManager = require('../helpers/dataManager');
+    var _emailManager = require('../business/emailManager');
+    var _entityManager = require('../business/entityManager');
+    var _errorMessageManager = require('../helpers/errorMessageManager');
+
+    var _globalErrorMap = _errorMessageManager.global;
+    var _userManagerErrorMap = _errorMessageManager.userManager;
+
+    var _outgoingEmailTemplateTypeMap = _emailManager.getOutgoingEmailTemplateTypeMap();
+
     function createUserService(data)
     {
-        return dataManager.processTransaction(transaction);
+        return _dataManager.processTransaction(transaction);
 
         function transaction(transactionScope)
         {
             if(!data.propertyMap.email)
-                throw new Error(userManagerError.emailIsNull);
+                throw new Error(_userManagerErrorMap.emailIsNull);
 
             if(!data.propertyMap.password)
-                throw new Error(userManagerError.passwordIsNull);
+                throw new Error(_userManagerErrorMap.passwordIsNull);
 
             var promise1 = getUserByEmail(data.propertyMap.email, transactionScope);
             
@@ -29,24 +29,24 @@ function managerDefinitions()
             .then(function(model1)
             {
                 if(model1)
-                    throw new Error(userManagerError.emailExist);
+                    throw new Error(_userManagerErrorMap.emailExist);
 
-                var promise2 = entityManager.getEntityByName('user', transactionScope);
+                var promise2 = _entityManager.getEntityByName('user', transactionScope);
 
                 promise2
                 .then(function(model2)
                 {
                     var entityId = model2.get('id');
-                    var promise3 = entityManager.getPropertyCollectionByEntityId(entityId, transactionScope);
+                    var promise3 = _entityManager.getPropertyCollectionByEntityId(entityId, transactionScope);
 
                     promise3
                     .then(function(model3)
                     {
                         var properties = model3.toJSON();
-                        dataManager.validateProperties('user', properties, data.propertyMap);
+                        _dataManager.validateProperties('user', properties, data.propertyMap);
 
                         var newUserModel = {
-                            date: dataManager.getDateTimeNow(),
+                            date: _dataManager.getDateTimeNow(),
                             email: data.propertyMap.email,
                             password: data.propertyMap.password,
                             name: data.propertyMap.name,
@@ -54,7 +54,7 @@ function managerDefinitions()
                             bitcoin_address: data.propertyMap.bitcoin_address
                         };
                         
-                        var promise4 = dataManager.save('user', newUserModel, transactionScope);
+                        var promise4 = _dataManager.save('user', newUserModel, transactionScope);
 
                         promise4
                         .then(function(model4)
@@ -62,16 +62,16 @@ function managerDefinitions()
                             var createdUserId = model4.get('id');
 
                             var newUserSessionModel = {
-                                date: dataManager.getDateTimeNow(),
+                                date: _dataManager.getDateTimeNow(),
                                 user_id: createdUserId
                             };
                             
-                            var promise5 = dataManager.save('userSession', newUserSessionModel, transactionScope);
+                            var promise5 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
 
                             promise5
                             .then(function(model5)
                             {
-                                var promise6 = emailManager.createOutgoingEmailFromTemplate(data.propertyMap.email, outgoingEmailTemplateTypeMap.userManager.createUser, transactionScope);
+                                var promise6 = _emailManager.createOutgoingEmailFromTemplate(data.propertyMap.email, _outgoingEmailTemplateTypeMap.userManager.createUser, transactionScope);
 
                                 promise6
                                 .then(function(model6)
@@ -97,12 +97,12 @@ function managerDefinitions()
 
     function getUserService(data)
     {
-        return dataManager.processTransaction(transaction);
+        return _dataManager.processTransaction(transaction);
 
         function transaction(transactionScope)
         {
             if(!data.propertyMap.email)
-                throw new Error(userManagerError.emailIsNull);
+                throw new Error(_userManagerErrorMap.emailIsNull);
 
             var promise1 = getUserSessionByUserSessionMap(data.userSessionMap, transactionScope);
 
@@ -112,13 +112,13 @@ function managerDefinitions()
                 var userSessions = model1.toJSON();
 
                 if(userSessions.length <= 0)
-                    throw new Error(globalError.sessionInvalid);
+                    throw new Error(_globalErrorMap.sessionInvalid);
 
                 var sessionId = userSessions[0].id;
                 var lastUserSessionDate = userSessions[0].date;
 
                 if(!userSessionIsValid(lastUserSessionDate))
-                    throw new Error(globalError.sessionInvalid);
+                    throw new Error(_globalErrorMap.sessionInvalid);
 
                 var promise2 = getUserByEmail(data.propertyMap.email, transactionScope);
 
@@ -126,7 +126,7 @@ function managerDefinitions()
                 .then(function(model2)
                 {
                     if(!model2)
-                        throw new Error(userManagerError.emailNotExist);
+                        throw new Error(_userManagerErrorMap.emailNotExist);
                     
                     return new Promise((resolve, reject) =>
                     {
@@ -142,15 +142,15 @@ function managerDefinitions()
 
     function getCredentialService(data)
     {
-        return dataManager.processTransaction(transaction);
+        return _dataManager.processTransaction(transaction);
 
         function transaction(transactionScope)
         {
             if(!data.propertyMap.email)
-                throw new Error(userManagerError.emailIsNull);
+                throw new Error(_userManagerErrorMap.emailIsNull);
 
             if(!data.propertyMap.password)
-                throw new Error(userManagerError.passwordIsNull);
+                throw new Error(_userManagerErrorMap.passwordIsNull);
 
             var promise1 = getUserByEmail(data.propertyMap.email, transactionScope);
             
@@ -158,13 +158,13 @@ function managerDefinitions()
             .then(function(model1)
             {
                 if(!model1)
-                    throw new Error(userManagerError.emailNotExist);
+                    throw new Error(_userManagerErrorMap.emailNotExist);
 
                 var userId = model1.get('id');
                 var password = model1.get('password');
 
                 if(data.propertyMap.password != password)
-                    throw new Error(userManagerError.wrongPassword);
+                    throw new Error(_userManagerErrorMap.wrongPassword);
 
                 var promise2 = getUserSessionByUserId(userId, transactionScope);
 
@@ -190,11 +190,11 @@ function managerDefinitions()
                     }
 
                     var newUserSessionModel = {
-                        date: dataManager.getDateTimeNow(),
+                        date: _dataManager.getDateTimeNow(),
                         user_id: userId
                     };
                     
-                    var promise3 = dataManager.save('userSession', newUserSessionModel, transactionScope);
+                    var promise3 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
 
                     promise3
                     .then(function(model3)
@@ -217,17 +217,17 @@ function managerDefinitions()
 
     function getUserByEmail(email, transactionScope)
     {
-        return dataManager.fetch('user', {email: email}, transactionScope);
+        return _dataManager.fetch('user', {email: email}, transactionScope);
     }
 
     function getUserSessionByUserId(userId, transactionScope)
     {
-        return dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {user_id: userId}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
+        return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {user_id: userId}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
     }
 
     function getUserSessionByUserSessionMap(userSessionMap, transactionScope)
     {
-        return dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {id: userSessionMap.session_id, user_id: userSessionMap.user_id}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
+        return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {id: userSessionMap.session_id, user_id: userSessionMap.user_id}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
     }
 
     function userSessionIsValid(lastUserSessionDate)
@@ -235,7 +235,7 @@ function managerDefinitions()
         var now = new Date();
         var timeDiff = Math.abs(now.getTime() - lastUserSessionDate.getTime());
 
-        return timeDiff < appConfig.userSessionTimeout;
+        return timeDiff < _appConfig.userSessionTimeout;
     }
 
     return {
@@ -245,4 +245,4 @@ function managerDefinitions()
     };
 }
 
-module.exports = managerDefinitions();
+module.exports = userManager();

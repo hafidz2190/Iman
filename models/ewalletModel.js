@@ -1,20 +1,26 @@
-var dbManager = require('../helpers/dbManager');
-
-var model = dbManager.Model.extend({
-    tableName: 'ewallet',
-    uuid: true,
-    phTransaction: phTransactionRelatedModelHandler,
-    user: userRelatedModelHandler
-});
-
-function phTransactionRelatedModelHandler()
+function modelDefinition()
 {
-    return this.belongsTo('phTransaction', 'ph_transaction_id');
+    var _dbManager = require('../helpers/dbManager');
+    var _tableName = 'ewallet';
+
+    var _model = _dbManager.Model.extend({
+        tableName: _tableName,
+        uuid: true,
+        phTransaction: phTransactionRelatedModelHandler,
+        user: userRelatedModelHandler
+    });
+
+    function phTransactionRelatedModelHandler()
+    {
+        return this.belongsTo('phTransaction', 'ph_transaction_id');
+    }
+
+    function userRelatedModelHandler()
+    {
+        return this.belongsTo('user', 'user_id').through('phTransaction', 'ph_transaction_id');
+    }
+
+    return _dbManager.model(_tableName, _model);
 }
 
-function userRelatedModelHandler()
-{
-    return this.belongsTo('user', 'user_id').through('phTransaction', 'ph_transaction_id');
-}
-
-module.exports = dbManager.model('ewallet', model);
+module.exports = modelDefinition();

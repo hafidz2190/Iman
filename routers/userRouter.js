@@ -1,11 +1,16 @@
-var express = require('express');
-var serviceManager = require('../helpers/serviceManager');
+function userRouter()
+{
+    var _express = require('express');
+    var _serviceManager = require('../helpers/serviceManager');
 
-var router = express.Router();
-var requestHandler = serviceManager.requestHandler;
+    var _router = _express.Router();
+    var _requestHandler = _serviceManager.requestHandler;
 
-router.post('/createUser', requestHandler);
-router.post('/getUser', requestHandler);
-router.post('/getCredential', requestHandler);
+    _router.post('/createUser', _requestHandler);
+    _router.post('/getUser', _requestHandler);
+    _router.post('/getCredential', _requestHandler);
 
-module.exports = router;
+    return _router;
+}
+
+module.exports = userRouter();

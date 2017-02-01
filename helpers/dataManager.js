@@ -1,17 +1,17 @@
-var dateFormat = require('dateformat');
-var dbManager = require('../helpers/dbManager');
-var modelMap = require('../models/index');
-
-function managerDefinitions() 
+function dataManager() 
 {
+    var _dateFormat = require('dateformat');
+    var _dbManager = require('../helpers/dbManager');
+    var _modelMap = require('../models/index');
+
     function fetch(modelName, filterMap, transactionScope)
     {
-        return new modelMap[modelName](filterMap).fetch({transacting: transactionScope});
+        return new _modelMap[modelName](filterMap).fetch({transacting: transactionScope});
     }
 
     function fetchAll(modelName, sortDescriptions, pageSize, page, transactionScope)
     {
-        return new modelMap[modelName]()
+        return new _modelMap[modelName]()
             .query(orderingHandler)
             .query(paginationHandler)
             .fetchAll({transacting: transactionScope});
@@ -40,7 +40,7 @@ function managerDefinitions()
 
     function fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize, page, transactionScope)
     {
-        return new modelMap[modelName]()
+        return new _modelMap[modelName]()
             .query(filterMap)
             .query(orderingHandler)
             .query(paginationHandler)
@@ -70,12 +70,12 @@ function managerDefinitions()
 
     function save(modelName, forger, transactionScope)
     {
-        return new modelMap[modelName](forger).save(null, {transacting: transactionScope});
+        return new _modelMap[modelName](forger).save(null, {transacting: transactionScope});
     }
 
     function processTransaction(transaction)
     {
-        return dbManager.transaction(transaction);
+        return _dbManager.transaction(transaction);
     }
 
     function validateProperties(entityName, databaseProperties, requestPropertyMap)
@@ -96,7 +96,7 @@ function managerDefinitions()
 
     function getDateTimeNow()
     {
-        return dateFormat(new Date(), 'yyyy-mm-dd H:MM:ss');
+        return _dateFormat(new Date(), 'yyyy-mm-dd H:MM:ss');
     }
 
     return {
@@ -110,4 +110,4 @@ function managerDefinitions()
     };
 }
 
-module.exports = managerDefinitions();
+module.exports = dataManager();

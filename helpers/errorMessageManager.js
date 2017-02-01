@@ -1,4 +1,4 @@
-function managerDefinitions() 
+function errorMessageManager() 
 {
     var errorMessageMap = {};
 
@@ -15,4 +15,4 @@ function managerDefinitions()
     return errorMessageMap;
 }
 
-module.exports = managerDefinitions();
+module.exports = errorMessageManager();

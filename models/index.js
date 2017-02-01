@@ -1,4 +1,4 @@
-function modelDefinitions()
+function indexManager()
 {
     return {
         dropdown: require('./dropdownModel'),
@@ -28,4 +28,4 @@ function modelDefinitions()
     };
 }
 
-module.exports = modelDefinitions();
+module.exports = indexManager();

@@ -1,20 +1,20 @@
-var userManager = require('../business/userManager');
-
-function serviceDefinitions() 
+function userService() 
 {
+    var _userManager = require('../business/userManager');
+    
     function createUserService(data)
     {
-        return userManager.createUserService(data);
+        return _userManager.createUserService(data);
     }
 
     function getUserService(data)
     {
-        return userManager.getUserService(data);
+        return _userManager.getUserService(data);
     }
 
     function getCredentialService(data)
     {
-        return userManager.getCredentialService(data);
+        return _userManager.getCredentialService(data);
     }
 
     return {
@@ -24,4 +24,4 @@ function serviceDefinitions()
     };
 }
 
-module.exports = serviceDefinitions();
+module.exports = userService();

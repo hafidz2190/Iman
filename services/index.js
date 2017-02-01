@@ -1,8 +1,8 @@
-function serviceDefinitions()
+function indexManager()
 {
     return {
         userService: require('./userService')
     };
 }
 
-module.exports = serviceDefinitions();
+module.exports = indexManager();

@@ -1,8 +1,8 @@
-var dataManager = require('../helpers/dataManager');
-var cron = require('cron');
-
-function managerDefinitions() 
+function scheduleManager() 
 {
+    var _dataManager = require('../helpers/dataManager');
+    var _cron = require('cron');
+
     function startOutgoingEmailSchedule()
     {
     }
@@ -17,4 +17,4 @@ function managerDefinitions()
     };
 }
 
-module.exports = managerDefinitions();
+module.exports = scheduleManager();

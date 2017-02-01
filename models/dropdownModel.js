@@ -1,14 +1,20 @@
-var dbManager = require('../helpers/dbManager');
-
-var model = dbManager.Model.extend({
-    tableName: 'dropdown',
-    uuid: true,
-    property: propertyRelatedModelHandler
-});
-
-function propertyRelatedModelHandler()
+function modelDefinition()
 {
-    return this.belongsTo('property', 'property_id');
+    var _dbManager = require('../helpers/dbManager');
+    var _tableName = 'dropdown';
+
+    var _model = _dbManager.Model.extend({
+        tableName: _tableName,
+        uuid: true,
+        property: propertyRelatedModelHandler
+    });
+
+    function propertyRelatedModelHandler()
+    {
+        return this.belongsTo('property', 'property_id');
+    }
+
+    return _dbManager.model(_tableName, _model);
 }
 
-module.exports = dbManager.model('dropdown', model);
+module.exports = modelDefinition();

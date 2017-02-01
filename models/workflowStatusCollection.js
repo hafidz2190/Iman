@@ -1,8 +1,13 @@
-var dbManager = require('../helpers/dbManager');
-var model = require('./workflowStatusModel');
+function collectionDefinition()
+{
+    var _dbManager = require('../helpers/dbManager');
+    var _model = require('./workflowStatusModel');
 
-var collection = dbManager.Collection.extend({
-    model: model
-});
+    var _collection = _dbManager.Collection.extend({
+        model: _model
+    });
 
-module.exports = collection;
+    return _collection;
+}
+
+module.exports = collectionDefinition();

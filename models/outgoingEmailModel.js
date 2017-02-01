@@ -1,8 +1,14 @@
-var dbManager = require('../helpers/dbManager');
+function modelDefinition()
+{
+    var _dbManager = require('../helpers/dbManager');
+    var _tableName = 'outgoingEmail';
 
-var model = dbManager.Model.extend({
-    tableName: 'outgoing_email',
-    uuid: true
-});
+    var _model = _dbManager.Model.extend({
+        tableName: _tableName,
+        uuid: true
+    });
 
-module.exports = dbManager.model('outgoingEmail', model);
+    return _dbManager.model(_tableName, _model);
+}
+
+module.exports = modelDefinition();

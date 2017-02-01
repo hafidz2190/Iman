@@ -1,14 +1,17 @@
-var appConfig = require('../config.json');
-var dataManager = require('../helpers/dataManager');
-var nodemailer = require('nodemailer');
-
-function managerDefinitions() 
+function emailManager() 
 {
+    var _appConfig = require('../config.json');
+    var _dataManager = require('../helpers/dataManager');
+    var _nodemailer = require('nodemailer');
+
+    var _transporterConfig = _appConfig.smtp.transporter;
+    var _smtpUser = _appConfig.smtp.transporter.auth.user;
+
     function sendEmail(to, subject, body)
     {
-        var transporter = nodemailer.createTransport(appConfig.smtp.transporter);
+        var transporter = _nodemailer.createTransport(_transporterConfig);
         var mailOptions = {
-            from: appConfig.smtp.transporter.auth.user,
+            from: _smtpUser,
             to: to,
             subject: subject,
             html: body
@@ -31,18 +34,18 @@ function managerDefinitions()
     function createOutgoingEmail(to, subject, body, transactionScope)
     {
         var outgoingEmailModel = {
-            from: appConfig.smtp.auth.XOAuth2.user,
+            from: _smtpUser,
             to: to,
             subject: subject,
             body: body
         };
 
-        return dataManager.save('outgoingEmail', outgoingEmailModel, transactionScope);
+        return _dataManager.save('outgoingEmail', outgoingEmailModel, transactionScope);
     }
 
     function createOutgoingEmailFromTemplate(to, type, transactionScope)
     {
-        return dataManager.save('outgoingEmail', getOutgoingEmailTemplate(to, type), transactionScope);
+        return _dataManager.save('outgoingEmail', getOutgoingEmailTemplate(to, type), transactionScope);
     }
 
     function getOutgoingEmailTemplateTypeMap()
@@ -57,7 +60,7 @@ function managerDefinitions()
     function getOutgoingEmailTemplate(to, type)
     {
         var outgoingEmailModel = {
-            from: appConfig.smtp.auth.XOAuth2.user,
+            from: _smtpUser,
             to: to,
             subject: 'No Subject',
             body: '<b>No Body</b>'
@@ -84,4 +87,4 @@ function managerDefinitions()
     };
 }
 
-module.exports = managerDefinitions();
+module.exports = emailManager();
