@@ -1,15 +1,20 @@
 function userService() 
 {
     var _userManager = require('../business/userManager');
-    
-    function createUserService(data)
+
+    function registerUserService(data)
     {
-        return _userManager.createUserService(data);
+        return _userManager.registerUserService(data);
     }
 
     function getUserService(data)
     {
         return _userManager.getUserService(data);
+    }
+
+    function updateUserService(data)
+    {
+        return _userManager.updateUserService(data);
     }
 
     function getCredentialService(data)
@@ -18,8 +23,9 @@ function userService()
     }
 
     return {
-        createUserService: createUserService,
+        registerUserService: registerUserService,
         getUserService: getUserService,
+        updateUserService: updateUserService,
         getCredentialService: getCredentialService
     };
 }

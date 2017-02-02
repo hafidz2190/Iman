@@ -1,92 +1,226 @@
 function userManager() 
 {
-    var _appConfig = require('../config.json');
     var _dataManager = require('../helpers/dataManager');
     var _emailManager = require('../business/emailManager');
     var _entityManager = require('../business/entityManager');
     var _errorMessageManager = require('../helpers/errorMessageManager');
+    var _userSessionManager = require('../business/userSessionManager');
 
-    var _globalErrorMap = _errorMessageManager.errorMessageMap.global;
-    var _userManagerErrorMap = _errorMessageManager.errorMessageMap.userManager;
-
+    var _userErrorMap = _errorMessageManager.errorMessageMap.user;
     var _outgoingEmailTemplateTypeMap = _emailManager.getOutgoingEmailTemplateTypeMap();
 
-    function createUserService(data)
+    function registerUserService(data)
+    {
+        preValidate();
+        sanitizePropertyMap();
+
+        return validatePropertyMap()
+        .then(doProcess);
+
+        function preValidate()
+        {
+            if(!data.propertyMap.email)
+                throw new Error(_errorMessageManager.propertyIsRequired('email'));
+
+            if(!data.propertyMap.password)
+                throw new Error(_errorMessageManager.propertyIsRequired('password'));
+        }
+
+        function sanitizePropertyMap()
+        {
+            var sanitizedPropertyMap = {};
+            sanitizedPropertyMap.owner = _dataManager.generateUuid();
+            sanitizedPropertyMap.email = data.propertyMap.email;
+            sanitizedPropertyMap.password = data.propertyMap.password;
+            sanitizedPropertyMap.name = '';
+            sanitizedPropertyMap.phone = '';
+            sanitizedPropertyMap.bitcoin_address = '';
+
+            data.propertyMap = sanitizedPropertyMap;
+        }
+
+        function validatePropertyMap()
+        {
+            return _entityManager.validatePropertyMap('user', data.propertyMap);
+        }
+
+        function doProcess()
+        {
+            return createUser(data); 
+        }
+    }
+
+    function getUserService(data)
+    {
+        preValidate();
+        sanitizePropertyMap();
+
+        return validatePropertyMap()
+        .then(validateUserSession)
+        .then(doProcess);
+
+        function preValidate()
+        {
+            if(!data.propertyMap.email)
+                throw new Error(_errorMessageManager.propertyIsRequired('email'));
+        }
+
+        function sanitizePropertyMap()
+        {
+            var sanitizedPropertyMap = {};
+            sanitizedPropertyMap.email = data.propertyMap.email;
+
+            data.propertyMap = sanitizedPropertyMap;
+        }
+
+        function validatePropertyMap()
+        {
+            return _entityManager.validatePropertyMap('user', data.propertyMap);
+        }
+
+        function validateUserSession()
+        {
+            return _userSessionManager.validateUserSession(data.userSessionMap);
+        }
+
+        function doProcess()
+        {
+            return getUser(data); 
+        }
+    }
+
+    function updateUserService(data)
+    {
+        sanitizePropertyMap();
+
+        return validatePropertyMap()
+        .then(validateUserSession)
+        .then(validateAuthorization)
+        .then(upgradeVersion)
+        .then(doProcess);
+
+        function sanitizePropertyMap()
+        {
+            data.propertyMap.id = data.propertyMap.id ? data.propertyMap.id : '';
+            data.propertyMap.version = data.propertyMap.version ? data.propertyMap.version : '';
+        }
+
+        function validatePropertyMap()
+        {
+            return _entityManager.validatePropertyMap('user', data.propertyMap);
+        }
+
+        function validateUserSession()
+        {
+            return _userSessionManager.validateUserSession(data.userSessionMap);
+        }
+
+        function validateAuthorization()
+        {
+            return _entityManager.validateAuthorization('user', data.propertyMap.id, data.propertyMap.version, data.userSessionMap.s_user_id);
+        }
+
+        function upgradeVersion()
+        {
+            data.propertyMap.version = _entityManager.upgradeVersion(data.propertyMap.version);
+        }
+
+        function doProcess()
+        {
+            return updateUser(data); 
+        }
+    }
+
+    function getCredentialService(data)
+    {
+        preValidate();
+        sanitizePropertyMap();
+
+        return validatePropertyMap()
+        .then(doProcess);
+
+        function preValidate()
+        {
+            if(!data.propertyMap.email)
+                throw new Error(_errorMessageManager.propertyIsRequired('email'));
+
+            if(!data.propertyMap.password)
+                throw new Error(_errorMessageManager.propertyIsRequired('password'));
+        }
+
+        function sanitizePropertyMap()
+        {
+            var sanitizedPropertyMap = {};
+            sanitizedPropertyMap.email = data.propertyMap.email;
+            sanitizedPropertyMap.password = data.propertyMap.password;
+
+            data.propertyMap = sanitizedPropertyMap;
+        }
+
+        function validatePropertyMap()
+        {
+            return _entityManager.validatePropertyMap('user', data.propertyMap);
+        }
+
+        function doProcess()
+        {
+            return getCredential(data); 
+        }
+    }
+
+    function createUser(data)
     {
         return _dataManager.processTransaction(transaction);
 
         function transaction(transactionScope)
         {
-            if(!data.propertyMap.email)
-                throw new Error(_userManagerErrorMap.emailIsNull);
-
-            if(!data.propertyMap.password)
-                throw new Error(_userManagerErrorMap.passwordIsNull);
-
             var promise1 = getUserByEmail(data.propertyMap.email, transactionScope);
             
+            // get user by email
             promise1
-            .then(function(model1)
+            .then(function(userModel)
             {
-                if(model1)
-                    throw new Error(_userManagerErrorMap.emailExist);
+                if(userModel)
+                    throw new Error(_userErrorMap.emailExist);
 
-                var promise2 = _entityManager.getEntityByName('user', transactionScope);
+                var promise2 = _dataManager.save('user', data.propertyMap, transactionScope);
 
+                // create user
                 promise2
-                .then(function(model2)
+                .then(function(createdUserModel)
                 {
-                    if(!model2)
-                        throw new Error(_errorMessageManager.formatError(_globalErrorMap.illegalEntity, ['user']));
+                    var createdUserId = createdUserModel.get('id');
+                    var modifiedCreatedUserModel = createdUserModel.toJSON();
+                    modifiedCreatedUserModel.owner = createdUserId;
 
-                    var entityId = model2.get('id');
-                    var promise3 = _entityManager.getPropertyCollectionByEntityId(entityId, transactionScope);
+                    var promise3 = _dataManager.save('user', modifiedCreatedUserModel, transactionScope);
 
+                    // update user owner to match with its id
                     promise3
-                    .then(function(model3)
+                    .then(function()
                     {
-                        var properties = !model3 ? [] : model3.toJSON();
-                        _dataManager.validateProperties('user', properties, data.propertyMap);
-
-                        var newUserModel = {
-                            date: _dataManager.getDateTimeNow(),
-                            email: data.propertyMap.email,
-                            password: data.propertyMap.password,
-                            name: data.propertyMap.name,
-                            phone: data.propertyMap.phone,
-                            bitcoin_address: data.propertyMap.bitcoin_address
+                        var newUserSessionModel = {
+                            s_user_id: createdUserId
                         };
                         
-                        var promise4 = _dataManager.save('user', newUserModel, transactionScope);
+                        var promise4 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
 
+                        // create user session
                         promise4
-                        .then(function(model4)
+                        .then(function(userSessionModel)
                         {
-                            var createdUserId = model4.get('id');
+                            var sessionId = userSessionModel.get('id');
+                            var promise5 = _emailManager.createOutgoingEmailFromTemplate(data.propertyMap.email, _outgoingEmailTemplateTypeMap.userManager.createUser, transactionScope);
 
-                            var newUserSessionModel = {
-                                date: _dataManager.getDateTimeNow(),
-                                s_user_id: createdUserId
-                            };
-                            
-                            var promise5 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
-
+                            // create outgoing email
                             promise5
-                            .then(function(model5)
+                            .then(function()
                             {
-                                var sessionId = model5.get('id');
-                                var promise6 = _emailManager.createOutgoingEmailFromTemplate(data.propertyMap.email, _outgoingEmailTemplateTypeMap.userManager.createUser, transactionScope);
-
-                                promise6
-                                .then(function(model6)
+                                return new Promise((resolve, reject) =>
                                 {
-                                    return new Promise((resolve, reject) =>
-                                    {
-                                        return resolve({s_user_id: createdUserId, s_session_id: sessionId});
-                                    })
-                                    .then(transactionScope.commit)
-                                    .catch(transactionScope.rollback);
+                                    return resolve({s_user_id: createdUserId, s_session_id: sessionId});
                                 })
+                                .then(transactionScope.commit)
                                 .catch(transactionScope.rollback);
                             })
                             .catch(transactionScope.rollback);
@@ -101,111 +235,105 @@ function userManager()
         }
     }
 
-    function getUserService(data)
+    function getUser(data)
     {
         return _dataManager.processTransaction(transaction);
 
         function transaction(transactionScope)
         {
-            if(!data.propertyMap.email)
-                throw new Error(_userManagerErrorMap.emailIsNull);
+            var promise1 = getUserByEmail(data.propertyMap.email, transactionScope);
 
-            var promise1 = getUserSessionByUserSessionMap(data.userSessionMap, transactionScope);
-
+            // get user by email
             promise1
-            .then(function(model1)
+            .then(function(userModel)
             {
-                var userSessions = model1.toJSON();
-
-                if(userSessions.length <= 0)
-                    throw new Error(_globalErrorMap.sessionInvalid);
-
-                var sessionId = userSessions[0].id;
-                var lastUserSessionDate = userSessions[0].date;
-
-                if(!userSessionIsValid(lastUserSessionDate))
-                    throw new Error(_globalErrorMap.sessionInvalid);
-
-                var promise2 = getUserByEmail(data.propertyMap.email, transactionScope);
-
-                promise2
-                .then(function(model2)
+                if(!userModel)
+                    throw new Error(_userErrorMap.emailNotExist);
+                
+                return new Promise((resolve, reject) =>
                 {
-                    if(!model2)
-                        throw new Error(_userManagerErrorMap.emailNotExist);
-                    
-                    return new Promise((resolve, reject) =>
-                    {
-                        return resolve(model2);
-                    })
-                    .then(transactionScope.commit)
-                    .catch(transactionScope.rollback);
+                    return resolve(userModel);
                 })
+                .then(transactionScope.commit)
+                .catch(transactionScope.rollback);
             })
             .catch(transactionScope.rollback);
         }
     }
 
-    function getCredentialService(data)
+    function updateUser(data)
     {
         return _dataManager.processTransaction(transaction);
 
         function transaction(transactionScope)
         {
-            if(!data.propertyMap.email)
-                throw new Error(_userManagerErrorMap.emailIsNull);
+            var promise1 = _dataManager.save('user', data.propertyMap, transactionScope);
 
-            if(!data.propertyMap.password)
-                throw new Error(_userManagerErrorMap.passwordIsNull);
+            // update user
+            promise1
+            .then(function(userModel)
+            {
+                var promise2 = _dataManager.fetch('user', {id: userModel.get('id')}, transactionScope);
 
+                // fetch updated user
+                return promise2;
+            })
+            .then(transactionScope.commit)
+            .catch(transactionScope.rollback);
+        }
+    }
+
+    function getCredential(data)
+    {
+        return _dataManager.processTransaction(transaction);
+
+        function transaction(transactionScope)
+        {
             var promise1 = getUserByEmail(data.propertyMap.email, transactionScope);
             
+            // get user by email
             promise1
-            .then(function(model1)
+            .then(function(userModel)
             {
-                if(!model1)
-                    throw new Error(_userManagerErrorMap.emailNotExist);
+                if(!userModel)
+                    throw new Error(_userErrorMap.emailNotExist);
 
-                var userId = model1.get('id');
-                var password = model1.get('password');
+                var userId = userModel.get('id');
+                var password = userModel.get('password');
 
                 if(data.propertyMap.password != password)
-                    throw new Error(_userManagerErrorMap.wrongPassword);
+                    throw new Error(_userErrorMap.wrongPassword);
 
                 var promise2 = getUserSessionByUserId(userId, transactionScope);
 
+                // get user session by user id
                 promise2
-                .then(function(model2)
+                .then(function(userSessionCollection)
                 {
-                    var userSessions = model2.toJSON();
-
-                    if(userSessions.length > 0)
+                    if(_userSessionManager.userSessionIsValid(userSessionCollection))
                     {
+                        var userSessions = userSessionCollection.toJSON();
                         var sessionId = userSessions[0].id;
-                        var lastUserSessionDate = userSessions[0].date;
-
-                        if(userSessionIsValid(lastUserSessionDate))
+                        
+                        return new Promise((resolve, reject) =>
                         {
-                            return new Promise((resolve, reject) =>
-                            {
-                                return resolve({s_user_id: userId, s_session_id: sessionId});
-                            })
-                            .then(transactionScope.commit)
-                            .catch(transactionScope.rollback);
-                        }
+                            return resolve({s_user_id: userId, s_session_id: sessionId});
+                        })
+                        .then(transactionScope.commit)
+                        .catch(transactionScope.rollback);                        
                     }
 
                     var newUserSessionModel = {
-                        date: _dataManager.getDateTimeNow(),
                         s_user_id: userId
                     };
                     
                     var promise3 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
 
+                    // create user session
                     promise3
-                    .then(function(model3)
+                    .then(function(createdUserSessionModel)
                     {
-                        var createdUserSessionId = model3.get('id');
+                        var createdUserSessionId = createdUserSessionModel.get('id');
                         
                         return new Promise((resolve, reject) =>
                         {
@@ -231,22 +359,10 @@ function userManager()
         return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {s_user_id: userId}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
     }
 
-    function getUserSessionByUserSessionMap(userSessionMap, transactionScope)
-    {
-        return _dataManager.fetchWithRelated('userSessionCollection', ['user'], {where: {id: userSessionMap.s_session_id, s_user_id: userSessionMap.s_user_id}}, [{field: 'date', direction: 'desc'}], 1, 1, transactionScope);
-    }
-
-    function userSessionIsValid(lastUserSessionDate)
-    {
-        var now = new Date();
-        var timeDiff = Math.abs(now.getTime() - lastUserSessionDate.getTime());
-
-        return timeDiff < _appConfig.userSessionTimeout;
-    }
-
     return {
-        createUserService: createUserService,
+        registerUserService: registerUserService,
         getUserService: getUserService,
+        updateUserService: updateUserService,
         getCredentialService: getCredentialService
     };
 }

@@ -1,23 +1,28 @@
 function dataManager() 
 {
-    var _errorMessageManager = require('../helpers/errorMessageManager');
     var _dateFormat = require('dateformat');
     var _dbManager = require('../helpers/dbManager');
     var _modelMap = require('../models/index');
-
-    var _globalErrorMap = _errorMessageManager.errorMessageMap.global;
+    var _uuid = require('uuid');
 
     function fetch(modelName, filterMap, transactionScope)
     {
-        return new _modelMap[modelName](filterMap).fetch({transacting: transactionScope});
+        var promise = new _modelMap[modelName](filterMap);
+
+        return transactionScope ?
+            promise.fetch({transacting: transactionScope}) : 
+            promise.fetch();
     }
 
     function fetchAll(modelName, sortDescriptions, pageSize, page, transactionScope)
     {
-        return new _modelMap[modelName]()
+        var promise = new _modelMap[modelName]()
             .query(orderingHandler)
-            .query(paginationHandler)
-            .fetchAll({transacting: transactionScope});
+            .query(paginationHandler);
+
+        return transactionScope ?
+            promise.fetchAll({transacting: transactionScope}) : 
+            promise.fetchAll();
         
         function orderingHandler(qb)
         {
@@ -43,11 +48,14 @@ function dataManager()
 
     function fetchWithRelated(modelName, relatedTableNames, filterMap, sortDescriptions, pageSize, page, transactionScope)
     {
-        return new _modelMap[modelName]()
+        var promise = new _modelMap[modelName]()
             .query(filterMap)
             .query(orderingHandler)
-            .query(paginationHandler)
-            .fetch({withRelated: relatedTableNames, transacting: transactionScope});
+            .query(paginationHandler);
+
+        return transactionScope ? 
+            promise.fetch({withRelated: relatedTableNames, transacting: transactionScope}) : 
+            promise.fetch({withRelated: relatedTableNames});
 
         function orderingHandler(qb)
         {
@@ -73,7 +81,11 @@ function dataManager()
 
     function save(modelName, forger, transactionScope)
     {
-        return new _modelMap[modelName](forger).save(null, {transacting: transactionScope});
+        var promise = new _modelMap[modelName](forger);
+
+        return transactionScope ? 
+            promise.save(null, {transacting: transactionScope}) :
+            promise.save();
     }
 
     function processTransaction(transaction)
@@ -81,20 +93,9 @@ function dataManager()
         return _dbManager.transaction(transaction);
     }
 
-    function validateProperties(entityName, databaseProperties, requestPropertyMap)
+    function generateUuid()
     {
-        var databasePropertyMap = {};
-
-        for(var i = 0, ii = databaseProperties.length; i < ii; i++)
-        {
-            var property = databaseProperties[i];
-            var name = property.name;
-            databasePropertyMap[name] = true;
-        }
-
-        for(var propertyName in requestPropertyMap)
-            if(!(propertyName in databasePropertyMap))
-                throw new Error(_errorMessageManager.formatError(_globalErrorMap.illegalProperty, [propertyName, entityName]));
+        return _uuid.v1();
     }
 
     function getDateTimeNow()
@@ -108,7 +109,7 @@ function dataManager()
         fetchWithRelated: fetchWithRelated,
         processTransaction: processTransaction,
         save: save,
-        validateProperties: validateProperties,
+        generateUuid: generateUuid,
         getDateTimeNow: getDateTimeNow
     };
 }
