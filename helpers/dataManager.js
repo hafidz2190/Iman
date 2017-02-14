@@ -1,9 +1,10 @@
 function dataManager() 
 {
     var _dateFormat = require('dateformat');
-    var _dbManager = require('../helpers/dbManager');
-    var _modelMap = require('../models/index');
     var _uuid = require('uuid');
+
+    var _dbManager = requireLocal('helpers/dbManager');
+    var _modelMap = requireLocal('models/index');
 
     function fetch(modelName, filterMap, transactionScope)
     {
@@ -24,6 +25,39 @@ function dataManager()
             promise.fetchAll({transacting: transactionScope}) : 
             promise.fetchAll();
         
+        function orderingHandler(qb)
+        {
+            if(!sortDescriptions)
+                return;
+            
+            for(var i = 0, ii = sortDescriptions.length; i < ii; i++)
+                qb.orderBy(sortDescriptions[i].field, sortDescriptions[i].direction);
+        }
+
+        function paginationHandler(qb)
+        {
+            if(!pageSize)
+                return;
+
+            if(pageSize)
+                qb.limit(pageSize);
+
+            if(page)
+                qb.offset(page < 2 ? 0 : pageSize * page - pageSize );
+        }
+    }
+
+    function fetchWithoutRelated(modelName, filterMap, sortDescriptions, pageSize, page, transactionScope)
+    {
+        var promise = new _modelMap[modelName]()
+            .query(filterMap)
+            .query(orderingHandler)
+            .query(paginationHandler);
+
+        return transactionScope ? 
+            promise.fetch({transacting: transactionScope}) : 
+            promise.fetch();
+
         function orderingHandler(qb)
         {
             if(!sortDescriptions)
@@ -106,6 +140,7 @@ function dataManager()
     return {
         fetch: fetch,
         fetchAll: fetchAll,
+        fetchWithoutRelated: fetchWithoutRelated,
         fetchWithRelated: fetchWithRelated,
         processTransaction: processTransaction,
         save: save,

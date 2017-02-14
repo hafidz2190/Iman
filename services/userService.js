@@ -1,6 +1,6 @@
 function userService() 
 {
-    var _userManager = require('../business/userManager');
+    var _userManager = requireLocal('business/userManager');
 
     function registerUserService(data)
     {
@@ -22,11 +22,29 @@ function userService()
         return _userManager.getCredentialService(data);
     }
 
+    function requestResetPasswordService(data)
+    {
+        return _userManager.requestResetPasswordService(data);
+    }
+
+    function resetPasswordService(data)
+    {
+        return _userManager.resetPasswordService(data);
+    }
+
+    function verifyAccountService(data)
+    {
+        return _userManager.verifyAccountService(data);
+    }
+
     return {
         registerUserService: registerUserService,
         getUserService: getUserService,
         updateUserService: updateUserService,
-        getCredentialService: getCredentialService
+        getCredentialService: getCredentialService,
+        requestResetPasswordService: requestResetPasswordService,
+        resetPasswordService: resetPasswordService,
+        verifyAccountService: verifyAccountService
     };
 }
 

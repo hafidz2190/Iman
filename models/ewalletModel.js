@@ -1,6 +1,7 @@
 function modelDefinition()
 {
-    var _dbManager = require('../helpers/dbManager');
+    var _dbManager = requireLocal('helpers/dbManager');
+    
     var _modelName = 'ewallet';
     var _tableName = 'b_ewallet';
 

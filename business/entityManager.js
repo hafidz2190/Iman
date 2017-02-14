@@ -1,9 +1,10 @@
 function entityManager() 
 {
-    var _dataManager = require('../helpers/dataManager');
-    var _errorMessageManager = require('../helpers/errorMessageManager');
+    var _dataManager = requireLocal('helpers/dataManager');
+    var _enumManager = requireLocal('business/enumManager');
+    var _stringManager = requireLocal('helpers/stringManager');
 
-    var _entityErrorMap = _errorMessageManager.errorMessageMap.entity;
+    var _entityErrorMap = _enumManager.errorMessageMap.entity;
     var _systemPropertyMap = {
         'id': true,
         'version': true,
@@ -68,9 +69,10 @@ function entityManager()
             .then(function(entityModel)
             {
                 if(!entityModel)
-                    throw new Error(_errorMessageManager.formatError(_entityErrorMap.illegalEntity, [entityName]));
+                    throw new Error(_stringManager.formatString(_entityErrorMap.illegalEntity, [entityName]));
 
                 var entityId = entityModel.get('id');
+                
                 var promise2 = _dataManager.fetchWithRelated('propertyCollection', ['entity'], {where: {s_entity_id: entityId}}, null, null, null);
 
                 // get properties by entity id
@@ -106,7 +108,7 @@ function entityManager()
 
         for(var propertyName in requestPropertyMap)
             if(!(propertyName in _systemPropertyMap) && !(propertyName in databasePropertyMap))
-                throw new Error(_errorMessageManager.formatError(_entityErrorMap.illegalProperty, [propertyName, entityName]));
+                throw new Error(_stringManager.formatString(_entityErrorMap.illegalProperty, [propertyName, entityName]));
     }
 
     return {

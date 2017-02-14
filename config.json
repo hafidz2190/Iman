@@ -9,9 +9,6 @@
             "charset": "utf8"
         }
     },
-    "server": {
-        "port": "9999"
-    },
     "smtp": {
         "transporter": {
             "host": "smtp.gmail.com",
@@ -23,5 +20,12 @@
             }            
         }
     },
-    "userSessionTimeout": "600000"
+    "port": "9999",
+    "userSessionTimeout": "600000",
+    "saltRounds": "10",
+    "templateDirectory": "templates/",
+    "scheduleInterval": "*/3 * * * * *",
+    "wsBaseHrefUrl": "http://ws.mmmiman.com:9999",
+    "resetPasswordUrl": "http://app.mmmiman.com/#/reset-password",
+    "verifyAccountServiceUrl": "http://app.mmmiman.com/#/login"
 }

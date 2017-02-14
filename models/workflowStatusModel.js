@@ -1,12 +1,12 @@
 function modelDefinition()
 {
-    var _dbManager = require('../helpers/dbManager');
+    var _dbManager = requireLocal('helpers/dbManager');
+    
     var _modelName = 'workflowStatus';
     var _tableName = 's_workflow_status';
 
     var _model = _dbManager.Model.extend({
         tableName: _tableName,
-        uuid: true,
         uuid: true,
         property: propertyRelatedModelHandler
     });

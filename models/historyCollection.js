@@ -1,7 +1,7 @@
 function collectionDefinition()
 {
-    var _dbManager = require('../helpers/dbManager');
-    var _model = require('./historyModel');
+    var _dbManager = requireLocal('helpers/dbManager');
+    var _model = requireLocal('models/historyModel');
 
     var _collection = _dbManager.Collection.extend({
         model: _model

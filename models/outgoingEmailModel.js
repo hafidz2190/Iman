@@ -1,6 +1,7 @@
 function modelDefinition()
 {
-    var _dbManager = require('../helpers/dbManager');
+    var _dbManager = requireLocal('helpers/dbManager');
+    
     var _modelName = 'outgoingEmail';
     var _tableName = 's_outgoing_email';
 

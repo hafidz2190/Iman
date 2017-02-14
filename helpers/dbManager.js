@@ -1,6 +1,7 @@
 function dbManager()
 {
-    var _appConfig = require('../config.json');
+    var _appConfig = requireLocal('config.json');
+
     var _knex = require('knex')(_appConfig.database);
     var _bookshelf = require('bookshelf')(_knex);
     var _uuid = require('bookshelf-uuid');
@@ -10,4 +11,5 @@ function dbManager()
 
     return _bookshelf;
 }
+
 module.exports = dbManager();

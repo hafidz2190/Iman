@@ -1,23 +1,30 @@
 function serviceManager()
 {
-    var _serviceMap = require('../services/index');
+    var _serviceMap = requireLocal('services/index');
 
     var _methodMap = {
-        '/registerUser': {method: _serviceMap.userService.registerUserService, serializer: 2},
-        '/createUser': {method: _serviceMap.userService.createUserService, serializer: 2},
-        '/getUser': {method: _serviceMap.userService.getUserService, serializer: 3},
-        '/updateUser': {method: _serviceMap.userService.updateUserService, serializer: 3},
-        '/getCredential': {method: _serviceMap.userService.getCredentialService, serializer: 2}
+        '/user/registerUser': {method: _serviceMap.userService.registerUserService, serializer: 2},
+        '/user/createUser': {method: _serviceMap.userService.createUserService, serializer: 2},
+        '/user/getUser': {method: _serviceMap.userService.getUserService, serializer: 3},
+        '/user/updateUser': {method: _serviceMap.userService.updateUserService, serializer: 3},
+        '/user/getCredential': {method: _serviceMap.userService.getCredentialService, serializer: 2},
+        '/user/requestResetPassword': {method: _serviceMap.userService.requestResetPasswordService, serializer: 3},
+        '/user/resetPassword': {method: _serviceMap.userService.resetPasswordService, serializer: 3},
+        '/user/verifyAccount': {method: _serviceMap.userService.verifyAccountService, serializer: 2}
     };
 
     function requestHandler(req, res, next)
     {
-        var method = _methodMap[req.url].method;
+        var url = req.baseUrl + req.route.path;
+        var method = _methodMap[url].method;
         var serializer = defaultSerializer;
         var data = req.body;
         data = sanitizeRequestParam(data);
 
-        switch (_methodMap[req.url].serializer) 
+        if(req.method == 'GET')
+            data.propertyMap = req.query;
+
+        switch (_methodMap[url].serializer) 
         {
             case 1:
                 serializer = collectionSerializer

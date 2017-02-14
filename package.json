@@ -21,6 +21,9 @@
     "dateformat": "latest",
     "cookie-parser": "latest",
     "nodemailer": "latest",
-    "node-cron": "latest"
+    "node-cron": "latest",
+    "bcryptjs": "latest",
+    "app-root-path": "latest",
+    "randomstring": "latest"
   }
 }

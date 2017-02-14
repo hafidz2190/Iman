@@ -1,7 +1,7 @@
 function indexManager()
 {
     return {
-        userService: require('./userService')
+        userService: requireLocal('services/userService')
     };
 }
 

@@ -1,10 +1,10 @@
 function userSessionManager() 
 {
-    var _appConfig = require('../config.json');
-    var _dataManager = require('../helpers/dataManager');
-    var _errorMessageManager = require('../helpers/errorMessageManager');
+    var _appConfig = requireLocal('config.json');
+    var _dataManager = requireLocal('helpers/dataManager');
+    var _enumManager = requireLocal('business/enumManager');
 
-    var _userSessionErrorMap = _errorMessageManager.errorMessageMap.userSession;
+    var _userSessionErrorMap = _enumManager.errorMessageMap.userSession;
 
     function userSessionIsValid(userSessionCollection)
     {

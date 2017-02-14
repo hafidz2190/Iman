@@ -1,13 +1,21 @@
 function userManager() 
 {
-    var _dataManager = require('../helpers/dataManager');
-    var _emailManager = require('../business/emailManager');
-    var _entityManager = require('../business/entityManager');
-    var _errorMessageManager = require('../helpers/errorMessageManager');
-    var _userSessionManager = require('../business/userSessionManager');
+    var _appConfig = requireLocal('config.json');
+    var _dataManager = requireLocal('helpers/dataManager');
+    var _emailManager = requireLocal('business/emailManager');
+    var _encryptionManager = requireLocal('business/encryptionManager');
+    var _entityManager = requireLocal('business/entityManager');
+    var _enumManager = requireLocal('business/enumManager');
+    var _errorMessageManager = requireLocal('business/errorMessageManager');
+    var _stringManager = requireLocal('helpers/stringManager');
+    var _templateManager = requireLocal('helpers/templateManager');
+    var _userSessionManager = requireLocal('business/userSessionManager');
 
-    var _userErrorMap = _errorMessageManager.errorMessageMap.user;
-    var _outgoingEmailTemplateTypeMap = _emailManager.getOutgoingEmailTemplateTypeMap();
+    var _emailSubjectMap = _enumManager.emailSubjectMap;
+    var _resetPasswordUrl = _appConfig.resetPasswordUrl;
+    var _templatePathMap = _enumManager.templatePathMap;
+    var _userErrorMap = _enumManager.errorMessageMap.user;
+    var _verifyAccountServiceUrl = _appConfig.verifyAccountServiceUrl;
 
     function registerUserService(data)
     {
@@ -15,6 +23,7 @@ function userManager()
         sanitizePropertyMap();
 
         return validatePropertyMap()
+        .then(generateHash)
         .then(doProcess);
 
         function preValidate()
@@ -24,6 +33,9 @@ function userManager()
 
             if(!data.propertyMap.password)
                 throw new Error(_errorMessageManager.propertyIsRequired('password'));
+
+            if(!data.propertyMap.name)
+                throw new Error(_errorMessageManager.propertyIsRequired('name'));
         }
 
         function sanitizePropertyMap()
@@ -32,9 +44,10 @@ function userManager()
             sanitizedPropertyMap.owner = _dataManager.generateUuid();
             sanitizedPropertyMap.email = data.propertyMap.email;
             sanitizedPropertyMap.password = data.propertyMap.password;
-            sanitizedPropertyMap.name = '';
+            sanitizedPropertyMap.name = data.propertyMap.name;
             sanitizedPropertyMap.phone = '';
             sanitizedPropertyMap.bitcoin_address = '';
+            sanitizedPropertyMap.activation_id = _dataManager.generateUuid();
 
             data.propertyMap = sanitizedPropertyMap;
         }
@@ -42,6 +55,17 @@ function userManager()
         function validatePropertyMap()
         {
             return _entityManager.validatePropertyMap('user', data.propertyMap);
+        }
+
+        function generateHash()
+        {
+            return _encryptionManager.generateHash(data.propertyMap.password)
+            .then(generateHashCallback);
+
+            function generateHashCallback(result)
+            {
+                data.propertyMap.password = result;
+            }            
         }
 
         function doProcess()
@@ -96,6 +120,7 @@ function userManager()
         return validatePropertyMap()
         .then(validateUserSession)
         .then(validateAuthorization)
+        .then(generateHash)
         .then(upgradeVersion)
         .then(doProcess);
 
@@ -120,6 +145,17 @@ function userManager()
             return _entityManager.validateAuthorization('user', data.propertyMap.id, data.propertyMap.version, data.userSessionMap.s_user_id);
         }
 
+        function generateHash()
+        {
+            return _encryptionManager.generateHash(data.propertyMap.password)
+            .then(generateHashCallback);
+
+            function generateHashCallback(result)
+            {
+                data.propertyMap.password = result;
+            }            
+        }
+
         function upgradeVersion()
         {
             data.propertyMap.version = _entityManager.upgradeVersion(data.propertyMap.version);
@@ -135,7 +171,7 @@ function userManager()
     {
         preValidate();
         sanitizePropertyMap();
-
+        
         return validatePropertyMap()
         .then(doProcess);
 
@@ -168,6 +204,82 @@ function userManager()
         }
     }
 
+    function requestResetPasswordService(data)
+    {
+        sanitizePropertyMap();
+
+        return doProcess();
+
+        function sanitizePropertyMap()
+        {
+            var newPropertyMap = {};
+            newPropertyMap.email = data.propertyMap.email ? data.propertyMap.email : '';
+            newPropertyMap.reset_password_id = _dataManager.generateUuid();
+
+            data.propertyMap = newPropertyMap;
+        }
+
+        function doProcess()
+        {
+            return requestResetPassword(data); 
+        }
+    }
+
+    function resetPasswordService(data)
+    {
+        sanitizePropertyMap();
+
+        return generateHash()
+        .then(doProcess);
+
+        function sanitizePropertyMap()
+        {
+            var newPropertyMap = {};
+            newPropertyMap.id = data.propertyMap.id ? data.propertyMap.id : '';
+            newPropertyMap.reset_password_id = data.propertyMap.reset_password_id ? data.propertyMap.reset_password_id : '';
+            newPropertyMap.password = data.propertyMap.password ? data.propertyMap.password : '';
+
+            data.propertyMap = newPropertyMap;
+        }
+
+        function generateHash()
+        {
+            return _encryptionManager.generateHash(data.propertyMap.password)
+            .then(generateHashCallback);
+
+            function generateHashCallback(result)
+            {
+                data.propertyMap.password = result;
+            }            
+        }
+
+        function doProcess()
+        {
+            return resetPassword(data); 
+        }
+    }
+
+    function verifyAccountService(data)
+    {
+        sanitizePropertyMap();
+
+        return doProcess();
+
+        function sanitizePropertyMap()
+        {
+            var newPropertyMap = {};
+            newPropertyMap.id = data.propertyMap.id ? data.propertyMap.id : '';
+            newPropertyMap.activation_id = data.propertyMap.activation_id ? data.propertyMap.activation_id : '';
+
+            data.propertyMap = newPropertyMap;
+        }
+
+        function doProcess()
+        {
+            return verifyAccount(data); 
+        }
+    }
+
     function createUser(data)
     {
         return _dataManager.processTransaction(transaction);
@@ -190,10 +302,12 @@ function userManager()
                 .then(function(createdUserModel)
                 {
                     var createdUserId = createdUserModel.get('id');
-                    var modifiedCreatedUserModel = createdUserModel.toJSON();
-                    modifiedCreatedUserModel.owner = createdUserId;
+                    var createdUserActivationId = createdUserModel.get('activation_id');
+                    var createdUserName = createdUserModel.get('name');
+                    var toUpdateUserModel = createdUserModel.toJSON();
+                    toUpdateUserModel.owner = createdUserId;
 
-                    var promise3 = _dataManager.save('user', modifiedCreatedUserModel, transactionScope);
+                    var promise3 = _dataManager.save('user', toUpdateUserModel, transactionScope);
 
                     // update user owner to match with its id
                     promise3
@@ -210,17 +324,30 @@ function userManager()
                         .then(function(userSessionModel)
                         {
                             var sessionId = userSessionModel.get('id');
-                            var promise5 = _emailManager.createOutgoingEmailFromTemplate(data.propertyMap.email, _outgoingEmailTemplateTypeMap.userManager.createUser, transactionScope);
-
-                            // create outgoing email
+                            
+                            var promise5 = _templateManager.getTemplate(_templatePathMap.user.verification);
+                            
+                            // get template
                             promise5
-                            .then(function()
+                            .then(function(templateResult)
                             {
-                                return new Promise((resolve, reject) =>
+                                var verifyAccountUrl = _verifyAccountServiceUrl + '?id=' + createdUserId + '&activation_id=' + createdUserActivationId;
+                                var body = _stringManager.formatString(templateResult, [createdUserName, verifyAccountUrl]);
+                                var subject = _emailSubjectMap.user.verification;
+
+                                var promise6 = _emailManager.createOutgoingEmail(data.propertyMap.email, subject, body, transactionScope);
+
+                                // create outgoing email
+                                promise6
+                                .then(function()
                                 {
-                                    return resolve({s_user_id: createdUserId, s_session_id: sessionId});
+                                    return new Promise((resolve, reject) =>
+                                    {
+                                        return resolve({s_user_id: createdUserId, s_session_id: sessionId});
+                                    })
+                                    .then(transactionScope.commit)
+                                    .catch(transactionScope.rollback);
                                 })
-                                .then(transactionScope.commit)
                                 .catch(transactionScope.rollback);
                             })
                             .catch(transactionScope.rollback);
@@ -271,9 +398,9 @@ function userManager()
 
             // update user
             promise1
-            .then(function(userModel)
+            .then(function(updatedUserModel)
             {
-                var promise2 = _dataManager.fetch('user', {id: userModel.get('id')}, transactionScope);
+                var promise2 = _dataManager.fetch('user', {id: updatedUserModel.get('id')}, transactionScope);
 
                 // fetch updated user
                 return promise2;
@@ -301,50 +428,173 @@ function userManager()
                 var userId = userModel.get('id');
                 var password = userModel.get('password');
 
-                if(data.propertyMap.password != password)
-                    throw new Error(_userErrorMap.wrongPassword);
+                var promise2 = _encryptionManager.compareHash(data.propertyMap.password, password);
 
-                var promise2 = getUserSessionByUserId(userId, transactionScope);
-
-                // get user session by user id
+                // compare password hash
                 promise2
-                .then(function(userSessionCollection)
+                .then(function(passwordMatch)
                 {
-                    if(_userSessionManager.userSessionIsValid(userSessionCollection))
+                    if(!passwordMatch)
+                        throw new Error(_userErrorMap.wrongPassword);
+                    
+                    var promise3 = getUserSessionByUserId(userId, transactionScope);
+
+                    // get user session by user id
+                    promise3
+                    .then(function(userSessionCollection)
                     {
-                        var userSessions = userSessionCollection.toJSON();
-                        var sessionId = userSessions[0].id;
-                        
-                        return new Promise((resolve, reject) =>
+                        if(_userSessionManager.userSessionIsValid(userSessionCollection))
                         {
-                            return resolve({s_user_id: userId, s_session_id: sessionId});
+                            var userSessions = userSessionCollection.toJSON();
+                            var sessionId = userSessions[0].id;
+                            
+                            return new Promise((resolve, reject) =>
+                            {
+                                return resolve({s_user_id: userId, s_session_id: sessionId});
+                            })
+                            .then(transactionScope.commit)
+                            .catch(transactionScope.rollback);                        
+                        }
+
+                        var newUserSessionModel = {
+                            s_user_id: userId
+                        };
+                        
+                        var promise4 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
+
+                        // create user session
+                        promise4
+                        .then(function(createdUserSessionModel)
+                        {
+                            var createdUserSessionId = createdUserSessionModel.get('id');
+                            
+                            return new Promise((resolve, reject) =>
+                            {
+                                return resolve({s_user_id: userId, s_session_id: createdUserSessionId});
+                            });
                         })
                         .then(transactionScope.commit)
-                        .catch(transactionScope.rollback);                        
-                    }
-
-                    var newUserSessionModel = {
-                        s_user_id: userId
-                    };
-                    
-                    var promise3 = _dataManager.save('userSession', newUserSessionModel, transactionScope);
-
-                    // create user session
-                    promise3
-                    .then(function(createdUserSessionModel)
-                    {
-                        var createdUserSessionId = createdUserSessionModel.get('id');
-                        
-                        return new Promise((resolve, reject) =>
-                        {
-                            return resolve({s_user_id: userId, s_session_id: createdUserSessionId});
-                        });
+                        .catch(transactionScope.rollback);
                     })
-                    .then(transactionScope.commit)
                     .catch(transactionScope.rollback);
                 })
                 .catch(transactionScope.rollback);
             })
+            .catch(transactionScope.rollback);
+        }
+    }
+
+    function requestResetPassword(data)
+    {
+        return _dataManager.processTransaction(transaction);
+
+        function transaction(transactionScope)
+        {
+            var promise1 = getUserByEmail(data.propertyMap.email, transactionScope);
+
+            // get user by email
+            promise1
+            .then(function(userModel)
+            {
+                if(!userModel)
+                    throw new Error(_userErrorMap.emailNotExist);
+                
+                var userId = userModel.get('id');
+                var userName = userModel.get('name');
+                var toUpdateUserModel = userModel.toJSON();
+                toUpdateUserModel.reset_password_id = data.propertyMap.reset_password_id;
+
+                var promise2 = _dataManager.save('user', toUpdateUserModel, transactionScope);
+
+                // update user
+                promise2
+                .then(function(updatedUserModel)
+                {
+                    var promise3 = _templateManager.getTemplate(_templatePathMap.user.resetPassword);
+
+                    // get template
+                    promise3
+                    .then(function(templateResult)
+                    {
+                        var resetPasswordUrl = _resetPasswordUrl + '?id=' + userId + '&reset_password_id=' + data.propertyMap.reset_password_id;
+                        var body = _stringManager.formatString(templateResult, [userName, resetPasswordUrl]);
+                        var subject = _emailSubjectMap.user.resetPassword;
+
+                        var promise4 = _emailManager.createOutgoingEmail(updatedUserModel.get('email'), subject, body, transactionScope);
+
+                        // create outgoing email
+                        promise4
+                        .then(function()
+                        {
+                            return new Promise((resolve, reject) =>
+                            {
+                                return resolve(updatedUserModel);
+                            })
+                            .then(transactionScope.commit)
+                            .catch(transactionScope.rollback);
+                        })
+                        .catch(transactionScope.rollback);
+                    })
+                    .catch(transactionScope.rollback);
+                })
+                .catch(transactionScope.rollback);
+            })
+            .catch(transactionScope.rollback);
+        }
+    }
+
+    function resetPassword(data)
+    {
+        return _dataManager.processTransaction(transaction);
+
+        function transaction(transactionScope)
+        {
+            var promise1 = _dataManager.fetch('user', {id: data.propertyMap.id, reset_password_id: data.propertyMap.reset_password_id}, transactionScope);
+
+            // get user by id and reset password id
+            promise1
+            .then(function(userModel)
+            {
+                if(!userModel)
+                    throw new Error(_userErrorMap.wrongResetPasswordId);
+
+                var toUpdateUserModel = userModel.toJSON();
+                toUpdateUserModel.password = data.propertyMap.password;
+
+                var promise2 = _dataManager.save('user', toUpdateUserModel, transactionScope);
+
+                // update user
+                return promise2;
+            })
+            .then(transactionScope.commit)
+            .catch(transactionScope.rollback);
+        }
+    }
+
+    function verifyAccount(data)
+    {
+        return _dataManager.processTransaction(transaction);
+
+        function transaction(transactionScope)
+        {
+            var promise1 = _dataManager.fetch('user', {id: data.propertyMap.id, activation_id: data.propertyMap.activation_id}, transactionScope);
+
+            // get user by id and activation id
+            promise1
+            .then(function(userModel)
+            {
+                if(!userModel)
+                    throw new Error(_userErrorMap.wrongActivationId);
+
+                var toUpdateUserModel = userModel.toJSON();
+                toUpdateUserModel.activated = 1;
+
+                var promise2 = _dataManager.save('user', toUpdateUserModel, transactionScope);
+
+                // update user
+                return promise2;
+            })
+            .then(transactionScope.commit)
             .catch(transactionScope.rollback);
         }
     }
@@ -363,7 +613,10 @@ function userManager()
         registerUserService: registerUserService,
         getUserService: getUserService,
         updateUserService: updateUserService,
-        getCredentialService: getCredentialService
+        getCredentialService: getCredentialService,
+        requestResetPasswordService: requestResetPasswordService,
+        resetPasswordService: resetPasswordService,
+        verifyAccountService: verifyAccountService
     };
 }
 

@@ -2,15 +2,19 @@ main();
 
 function main()
 {
-    var _appConfig = require('./config.json');
+    global.rooDirectory = __dirname;
+    global.requireLocal = require('app-root-path').require;
+
     var _bodyParser = require('body-parser');
     var _cookieParser = require('cookie-parser');
     var _express = require('express');
 
-    var _userRouter = require('./routers/userRouter');
+    var _appConfig = requireLocal('config.json');
+    var _scheduleManager = requireLocal('business/scheduleManager');
+    var _userRouter = requireLocal('routers/userRouter');
 
     var _app = _express();
-    var _port = _appConfig.server.port;
+    var _port = _appConfig.port;
 
     _app.use(_bodyParser.urlencoded({extended: true}));
     _app.use(_bodyParser.json());
@@ -21,6 +25,8 @@ function main()
     _app.use(errorHandler);
 
     _app.listen(_port, listenCallback);
+
+    _scheduleManager.start('sendEmail');
 
     function listenCallback()
     {
@@ -38,6 +44,6 @@ function main()
     function errorHandler(err, req, res, next)
     {
         res.status(500);
-        res.send(err.stack);
+        res.send({message: err.message, stack: err.stack});
     }
 }
